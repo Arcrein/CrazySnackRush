@@ -1,8 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from typing import List
+from contextlib import asynccontextmanager
+from components.Kitchen import kitchen
+import components.Furniture as F 
+import components.Ingredient as I
+import asyncio
+import time
 
-app = FastAPI()
+
 
 
 class IngredientDto(BaseModel):
@@ -18,6 +24,12 @@ class RecipeDto(BaseModel):
     CurrentPoints: int = 0
     TimeRemaining: float = 0.0
 
+class kitchenStartRequest(BaseModel):
+    furnitures: List[F.Furniture] = []
+    
+class SimpleResponse(BaseModel):
+    bSuccess: bool
+    Message: str
 
 class InteractRequest(BaseModel):
     chefId: int
@@ -33,6 +45,41 @@ class InteractResponse(BaseModel):
     UpdatedHeldIngredient: IngredientDto
     ActiveRecipes: List[RecipeDto]
 
+
+class GameState:
+    def __init__(self):
+        self.kitchen = kitchen()
+        self.lock = asyncio.Lock()
+        
+@asynccontextmanager
+async def lifeSpan(app:FastAPI):
+    app.state.game = GameState()
+    yield
+    app.state.game = None
+
+app = FastAPI(lifespan=lifeSpan)
+
+@app.post("/game/start", response_model=SimpleResponse)
+async def gameStart(data: kitchenStartRequest, request: Request):
+    game: GameState  = request.app.state.game
+    async with game.lock: 
+        for item in data.furnitures:
+            if item.type == "BunIngredientBox":
+                game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains=I.Ingredient(
+                    isCut= False,
+                    isTrash= False,
+                    isMixed= False,
+                    isFried= False,
+                    isDeepFried= False,
+                    isBoiled= False,
+                    canCut= False,
+                    canMix= False,
+                    canFry= False,
+                    canDeepFry= False,
+                    canBoil= False,
+                    name= "Bun"
+                )))
+    return SimpleResponse(bSuccess=True, Message="ok")
 
 @app.post("/game/interact", response_model=InteractResponse)
 def interact_with_station(request: InteractRequest):

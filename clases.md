@@ -28,9 +28,21 @@
 ### Name
 * Nombre del ingrediente (String)
 ### Status
+**Booleanos**
 * isCut
-* isCooked
-* isBurned
+* isTrash
+* isMixed
+* isFried
+* isDeepFried
+* isBoiled
+* canCut
+* canMix
+* canFry
+* canDeepFry
+* canBoil
+## Mix
+* Todos los status de los ingredientes
+* Lista de los nombres de los ingredientes
 ## Muebles
 ### Type
 * Mesa
@@ -62,8 +74,10 @@
 * Contains
 * removeObject
 ## Receta
-**Lista de ingredientes**
-## Estado del juego
+**Que salgan desde un archivo json que digan todos los ingredientes que puedan haber disponibles (arroz, pezcado, papa, alga, etc.). Todos los ingredientes tienen que tener sus estados, por ejemplo, el pezcado puede ser cortado y cocinado, la papa cortada y cocinada (en la freidora), pero por ejemplo el alga no se le puede hacer nada, todos los ingredientes pueden ser quemados**
+* Lista de ingredientes
+* Estado de los ingredientes
+## Estado del juego (Kitchen)
 * Lista de Ordenes
 * Tiempo Restante
 * Puntaje
