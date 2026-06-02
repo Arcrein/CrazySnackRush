@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
-from Ingredient import Ingredient
+from components.Ingredient import Ingredient
 
 class Furniture(BaseModel):
     stationId: int = 0
