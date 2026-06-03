@@ -1,0 +1,147 @@
+{
+    "Ingredients" : [
+        {                          
+            "name": "Hamburger Bread",
+            "type": "Breads and bases",
+            "canCut": false,
+            "canMix": false,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": false,
+            "canBurn": true
+
+        },
+        {
+            "name": "Meat",
+            "type": "Proteins",
+            "canCut": true,
+            "canMix": true,
+            "canFry": true,
+            "canBoil": false,
+            "canDeepFry": false,
+            "canBurn": true
+        },
+        {
+            "name": "Lettuce",
+            "type": "Vegetables and fruits",
+            "canCut": true,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": false,
+            "canBurn": true
+        },
+        {
+            "name": "Tomato",
+            "type": "Vegetables and fruits",
+            "canCut": true,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": false,
+            "canBurn": true
+        },
+        {
+            "name": "Cheese",
+            "type": "others",
+            "canCut": true,
+            "canMix": true,
+            "canFry": true,
+            "canBoil": false,
+            "canDeepFry": false,
+            "canBurn": true
+        },
+        {
+            "name": "flour",
+            "type": "others",
+            "canCut": false,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": false,
+            "canBurn": true
+        },
+        {
+            "name": "Egg",
+            "type": "Proteins",
+            "canCut": false,
+            "canMix": true,
+            "canFry": true,
+            "canBoil": true,
+            "canDeepFry": false,
+            "canBurn": true
+        },
+        {
+            "blueberry": "Blueberry",
+            "type": "Vegetables and fruits",
+            "canCut": true,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": false,
+            "canBurn": true 
+        },
+        {
+            "name": "Chocolate",
+            "type": "others",
+            "canCut": false,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": false,
+            "canBurn": true
+        },
+        {
+            "name": "strawberry",
+            "type": "Vegetables and fruits",
+            "canCut": true,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": false,
+            "canBurn": true
+        },
+        {
+            "name": "Batter",
+            "type": "others",
+            "canCut": false,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": true,
+            "canBurn": true
+        },
+        {
+            "name": "pancake blueberry batter",
+            "type": "others",
+            "canCut": false,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": false,   
+            "canBurn": true
+        },
+        {
+            "name": "chocolate batter",
+            "type": "others",
+            "canCut": false,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": false,   
+            "canBurn": true
+        },
+        {
+            "name": "pancake strawberry batter",
+            "type": "others",
+            "canCut": false,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": false,   
+            "canBurn": true
+        },
+        
+        
+    ]
+}
