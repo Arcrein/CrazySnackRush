@@ -102,7 +102,7 @@
             "canBurn": true
         },
         {
-            "name": "Batter",
+            "name": "pancake batter",
             "type": "others",
             "canCut": false,
             "canMix": true,
