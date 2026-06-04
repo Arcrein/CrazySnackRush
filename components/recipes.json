@@ -1,0 +1,128 @@
+{
+  "recipes": [
+    {
+      "name": "Hamburger",
+      "requiredIngredients": [
+        {"name": "Hamburger Bread", "requiredState": ["Cut"]},
+        {"name": "Meat", "requiredState": ["Cut", "Fried"]},
+        {"name": "Lettuce", "requiredState": ["Cut"]},
+        {"name": "Tomato", "requiredState": ["Cut"]},
+        {"name": "Cheese", "requiredState": ["Cut", "Fried"]}
+      ]
+    },
+    {
+      "name": "Pancake",
+      "requiredIngredients": [
+        {"name": "flour", "requiredState": ["Mix"]},
+        {"name": "Egg", "requiredState": ["Mix"]}
+      ]
+    },
+    {
+      "name": "blueberry pancake batter",
+      "requiredIngredients": [
+        {"name": "flour", "requiredState": ["Mix"]},
+        {"name": "Egg", "requiredState": ["Mix"]},
+        {"name": "Blueberry", "requiredState": ["Cut"]}
+      ]
+    },
+    {
+      "name": "chocolate batter",
+      "requiredIngredients": [
+        {"name": "flour", "requiredState": ["Mix"]},
+        {"name": "Egg", "requiredState": ["Mix"]},
+        {"name": "Chocolate", "requiredState": ["Cut"]}
+      ]
+    },
+    {
+      "name": "strawberry pancake batter",
+      "requiredIngredients": [
+        {"name": "flour", "requiredState": ["Mix"]},
+        {"name": "Egg", "requiredState": ["Mix"]},
+        {"name": "Strawberry", "requiredState": ["Cut"]}
+      ]
+    },
+    {
+      "name": "pancake",
+      "requiredIngredients": [
+        {"name": "pancake batter", "requiredState": ["Fried"]}
+      ]
+    },
+    {
+      "name": "blueberry pancake",
+      "requiredIngredients": [
+        {"name": "blueberry pancake batter", "requiredState": ["Fried"]}
+      ]
+    },
+    {
+      "name": "chocolate pancake",
+      "requiredIngredients": [
+        {"name": "chocolate batter", "requiredState": ["Fried"]}
+      ]
+    },
+    {
+      "name": "strawberry pancake",
+      "requiredIngredients": [
+        {"name": "strawberry pancake batter", "requiredState": ["Fried"]}
+      ]
+    },
+    {
+      "name": "chocolate donut",
+      "requiredIngredients": [
+        {"name": "chocolate batter", "requiredState": ["DeepFried"]}
+      ]
+    },
+    {
+      "name": "honey donut batter",
+      "requiredIngredients": [
+        {"name": "flour", "requiredState": ["Mix"]},
+        {"name": "Egg", "requiredState": ["Mix"]},
+        {"name": "Honeycomb", "requiredState": ["Cut"]}
+      ]
+    },
+    {
+      "name": "raspberry donut batter",
+      "requiredIngredients": [
+        {"name": "flour", "requiredState": ["Mix"]},
+        {"name": "Egg", "requiredState": ["Mix"]},
+        {"name": "Raspberry", "requiredState": ["Cut"]}
+      ]
+    },
+    {
+      "name": "honey donut",
+      "requiredIngredients": [
+        {"name": "honey donut batter", "requiredState": ["DeepFried"]}
+      ]
+    },
+    {
+      "name": "raspberry donut",
+      "requiredIngredients": [
+        {"name": "raspberry donut batter", "requiredState": ["DeepFried"]}
+      ]
+    },
+    {
+      "name": "sushi",
+      "requiredIngredients": [
+        {"name": "Rice", "requiredState": ["Boiled"]},
+        {"name": "Fish", "requiredState": ["Cut"]},
+        {"name": "Nori", "requiredState": ["Cut"]}
+      ]
+    },
+    {
+      "name": "cucumber sushi",
+      "requiredIngredients": [
+        {"name": "Rice", "requiredState": ["Boiled"]},
+        {"name": "Cucumber", "requiredState": ["Cut"]},
+        {"name": "Nori", "requiredState": ["Cut"]}
+      ]
+    },
+    {
+      "name": "fish and cucumber sushi",
+      "requiredIngredients": [
+        {"name": "Rice", "requiredState": ["Boiled"]},
+        {"name": "Fish", "requiredState": ["Cut"]},
+        {"name": "Cucumber", "requiredState": ["Cut"]},
+        {"name": "Nori", "requiredState": ["Cut"]}
+      ]
+    }
+  ]
+}
