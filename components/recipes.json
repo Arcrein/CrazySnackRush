@@ -3,15 +3,52 @@
     {
       "name": "Hamburger",
       "requiredIngredients": [
-        {"name": "Hamburger Bread", "requiredState": ["Cut"]},
+        {"name": "Bun", "requiredState": []},
+        {"name": "Meat", "requiredState": ["Cut", "Fried"]}
+      ], 
+      "canDeliver": true
+    },
+    {
+      "name": "Lettuce Hamburger",
+      "requiredIngredients": [
+        {"name": "Bun", "requiredState": []},
+        {"name": "Meat", "requiredState": ["Cut", "Fried"]},
+        {"name": "Lettuce", "requiredState": ["Cut"]}
+      ], 
+      "canDeliver": true
+    },
+    {
+      "name": "Lettuce and Tomato Hamburger",
+      "requiredIngredients": [
+        {"name": "Bun", "requiredState": []},
+        {"name": "Meat", "requiredState": ["Cut", "Fried"]},
+        {"name": "Lettuce", "requiredState": ["Cut"]},
+        {"name": "Tomato", "requiredState": ["Cut"]}
+      ], 
+      "canDeliver": true
+    },
+    {
+      "name": "Cheese Hamburger",
+      "requiredIngredients": [
+        {"name": "Bun", "requiredState": []},
+        {"name": "Meat", "requiredState": ["Cut", "Fried"]},
+        {"name": "Cheese", "requiredState": ["Cut"]}
+      ], 
+      "canDeliver": true
+    },
+    {
+      "name": "Full Hamburger",
+      "requiredIngredients": [
+        {"name": "Bun", "requiredState": []},
         {"name": "Meat", "requiredState": ["Cut", "Fried"]},
         {"name": "Lettuce", "requiredState": ["Cut"]},
         {"name": "Tomato", "requiredState": ["Cut"]},
-        {"name": "Cheese", "requiredState": ["Cut", "Fried"]}
-      ]
+        {"name": "Cheese", "requiredState": ["Cut"]}
+      ], 
+      "canDeliver": true
     },
     {
-      "name": "Pancake",
+      "name": "pancake batter",
       "requiredIngredients": [
         {"name": "flour", "requiredState": ["Mix"]},
         {"name": "Egg", "requiredState": ["Mix"]}
@@ -22,7 +59,7 @@
       "requiredIngredients": [
         {"name": "flour", "requiredState": ["Mix"]},
         {"name": "Egg", "requiredState": ["Mix"]},
-        {"name": "Blueberry", "requiredState": ["Cut"]}
+        {"name": "Blueberry", "requiredState": ["Cut", "Mix"]}
       ]
     },
     {
@@ -30,7 +67,7 @@
       "requiredIngredients": [
         {"name": "flour", "requiredState": ["Mix"]},
         {"name": "Egg", "requiredState": ["Mix"]},
-        {"name": "Chocolate", "requiredState": ["Cut"]}
+        {"name": "Chocolate", "requiredState": ["Cut", "Mix"]}
       ]
     },
     {
@@ -38,45 +75,50 @@
       "requiredIngredients": [
         {"name": "flour", "requiredState": ["Mix"]},
         {"name": "Egg", "requiredState": ["Mix"]},
-        {"name": "Strawberry", "requiredState": ["Cut"]}
+        {"name": "Strawberry", "requiredState": ["Cut", "Mix"]}
       ]
     },
     {
       "name": "pancake",
       "requiredIngredients": [
         {"name": "pancake batter", "requiredState": ["Fried"]}
-      ]
+      ], 
+      "canDeliver": true
     },
     {
       "name": "blueberry pancake",
       "requiredIngredients": [
         {"name": "blueberry pancake batter", "requiredState": ["Fried"]}
-      ]
+      ], 
+      "canDeliver": true
     },
     {
       "name": "chocolate pancake",
       "requiredIngredients": [
         {"name": "chocolate batter", "requiredState": ["Fried"]}
-      ]
+      ], 
+      "canDeliver": true
     },
     {
       "name": "strawberry pancake",
       "requiredIngredients": [
         {"name": "strawberry pancake batter", "requiredState": ["Fried"]}
-      ]
+      ], 
+      "canDeliver": true
     },
     {
       "name": "chocolate donut",
       "requiredIngredients": [
         {"name": "chocolate batter", "requiredState": ["DeepFried"]}
-      ]
+      ], 
+      "canDeliver": true
     },
     {
       "name": "honey donut batter",
       "requiredIngredients": [
         {"name": "flour", "requiredState": ["Mix"]},
         {"name": "Egg", "requiredState": ["Mix"]},
-        {"name": "Honeycomb", "requiredState": ["Cut"]}
+        {"name": "Honeycomb", "requiredState": ["Cut", "Mix"]}
       ]
     },
     {
@@ -84,20 +126,22 @@
       "requiredIngredients": [
         {"name": "flour", "requiredState": ["Mix"]},
         {"name": "Egg", "requiredState": ["Mix"]},
-        {"name": "Raspberry", "requiredState": ["Cut"]}
+        {"name": "Raspberry", "requiredState": ["Cut", "Mix"]}
       ]
     },
     {
       "name": "honey donut",
       "requiredIngredients": [
         {"name": "honey donut batter", "requiredState": ["DeepFried"]}
-      ]
+      ], 
+      "canDeliver": true
     },
     {
       "name": "raspberry donut",
       "requiredIngredients": [
         {"name": "raspberry donut batter", "requiredState": ["DeepFried"]}
-      ]
+      ], 
+      "canDeliver": true
     },
     {
       "name": "sushi",
@@ -105,7 +149,8 @@
         {"name": "Rice", "requiredState": ["Boiled"]},
         {"name": "Fish", "requiredState": ["Cut"]},
         {"name": "Nori", "requiredState": ["Cut"]}
-      ]
+      ], 
+      "canDeliver": true
     },
     {
       "name": "cucumber sushi",
@@ -113,7 +158,8 @@
         {"name": "Rice", "requiredState": ["Boiled"]},
         {"name": "Cucumber", "requiredState": ["Cut"]},
         {"name": "Nori", "requiredState": ["Cut"]}
-      ]
+      ], 
+      "canDeliver": true
     },
     {
       "name": "fish and cucumber sushi",
@@ -122,7 +168,8 @@
         {"name": "Fish", "requiredState": ["Cut"]},
         {"name": "Cucumber", "requiredState": ["Cut"]},
         {"name": "Nori", "requiredState": ["Cut"]}
-      ]
+      ], 
+      "canDeliver": true
     }
   ]
 }

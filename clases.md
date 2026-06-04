@@ -77,6 +77,7 @@
 **Que salgan desde un archivo json que digan todos los ingredientes que puedan haber disponibles (arroz, pezcado, papa, alga, etc.). Todos los ingredientes tienen que tener sus estados, por ejemplo, el pezcado puede ser cortado y cocinado, la papa cortada y cocinada (en la freidora), pero por ejemplo el alga no se le puede hacer nada, todos los ingredientes pueden ser quemados**
 * Lista de ingredientes
 * Estado de los ingredientes
+* canDeliver  (La receta es el producto final, entregable. Una receta no entregable puede ser ingrediente de otra receta)
 ## Estado del juego (Kitchen)
 * Lista de Ordenes
 * Tiempo Restante
