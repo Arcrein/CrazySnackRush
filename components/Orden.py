@@ -1,8 +1,6 @@
-from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import List
+from components.Recipe import Recipe
 
 class Orden(BaseModel):
-    name: str = ""
-    type: str = ""
-    state: str = ""
+    recipe: Recipe = None
+    status: bool = False

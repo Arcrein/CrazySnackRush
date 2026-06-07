@@ -1,9 +1,9 @@
 {
     "Ingredients" : [
         {                          
-            "name": "Bun",
-            "type": "Breads and bases",
-            "canCut": false,
+            "name": "Hamburger Bread",
+            "type": "BreadsAndBases",
+            "canCut": true,
             "canMix": false,
             "canFry": false,
             "canBoil": false,
@@ -23,7 +23,7 @@
         },
         {
             "name": "Lettuce",
-            "type": "Vegetables and fruits",
+            "type": "VegetablesAndFruits",
             "canCut": true,
             "canMix": true,
             "canFry": false,
@@ -33,7 +33,7 @@
         },
         {
             "name": "Tomato",
-            "type": "Vegetables and fruits",
+            "type": "VegetablesAndFruits",
             "canCut": true,
             "canMix": true,
             "canFry": false,
@@ -72,8 +72,8 @@
             "canBurn": true
         },
         {
-            "blueberry": "Blueberry",
-            "type": "Vegetables and fruits",
+            "name": "Blueberry",
+            "type": "VegetablesAndFruits",
             "canCut": true,
             "canMix": true,
             "canFry": false,
@@ -92,8 +92,19 @@
             "canBurn": true
         },
         {
-            "name": "strawberry",
-            "type": "Vegetables and fruits",
+            "name": "Strawberry",
+            "type": "VegetablesAndFruits",
+            "canCut": true,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": false,
+            "canDeepFry": false,
+            "canBurn": true
+        },
+
+        {
+            "name": "Honeycomb",
+            "type": "others",
             "canCut": true,
             "canMix": true,
             "canFry": false,
@@ -102,46 +113,55 @@
             "canBurn": true
         },
         {
-            "name": "pancake batter",
-            "type": "others",
-            "canCut": false,
+            "name": "Raspberry",
+            "type": "VegetablesAndFruits",
+            "canCut": true,
             "canMix": true,
             "canFry": false,
             "canBoil": false,
-            "canDeepFry": true,
+            "canDeepFry": false,
             "canBurn": true
         },
         {
-            "name": "pancake blueberry batter",
+            "name": "Nori",
             "type": "others",
-            "canCut": false,
+            "canCut": true,
             "canMix": true,
             "canFry": false,
             "canBoil": false,
-            "canDeepFry": false,   
+            "canDeepFry": false,
             "canBurn": true
         },
         {
-            "name": "chocolate batter",
-            "type": "others",
+            "name": "Rice",
+            "type": "BreadsAndBases",
             "canCut": false,
             "canMix": true,
             "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,   
+            "canBoil": true,
+            "canDeepFry": false,
             "canBurn": true
         },
         {
-            "name": "pancake strawberry batter",
-            "type": "others",
-            "canCut": false,
+            "name": "Fish",
+            "type": "Proteins",
+            "canCut": true,
+            "canMix": true,
+            "canFry": false,
+            "canBoil": true,
+            "canDeepFry": false,
+            "canBurn": true
+        },
+        {
+            "name": "Cucumber",
+            "type": "VegetablesAndFruits",
+            "canCut": true,
             "canMix": true,
             "canFry": false,
             "canBoil": false,
-            "canDeepFry": false,   
+            "canDeepFry": false,
             "canBurn": true
         }
-        
-        
+
     ]
 }
