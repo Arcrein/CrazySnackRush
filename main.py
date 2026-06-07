@@ -33,7 +33,7 @@ class SimpleResponse(BaseModel):
 
 class InteractRequest(BaseModel):
     chefId: int
-    stationId: str
+    stationId: int
     action: str
     heldIngredient: IngredientDto
 
