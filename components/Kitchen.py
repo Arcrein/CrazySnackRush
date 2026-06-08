@@ -4,12 +4,14 @@ from components.Orden import Orden
 import components.Furniture as F 
 import random
 from components.Recipe import load_recipes
+from components.Ingredient import Ingredient, load_ingredients
 
 class kitchen(BaseModel):
     name: str = ""
     type: str = ""
     state: str = ""
     furnitureList: List[F.Furniture] = []
+    ingredientList: List[Ingredient] = []
     order_list: List[Orden] = []
     time_remaining: float = 0.0
     points: int = 0
@@ -18,6 +20,12 @@ class kitchen(BaseModel):
         for furniture in self.furnitureList:
             if furniture.stationId == station_id:
                 return furniture
+        return None
+    
+    def getIngredient(self, name: str):
+        for ing in self.ingredientList:
+            if ing.name == name:
+                return ing
         return None
 
     def generate_random_order(self):

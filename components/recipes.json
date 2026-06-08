@@ -4,7 +4,7 @@
       "name": "Basic Hamburger",
       "canDeliver": true,
       "requiredIngredients": [
-        {"name": "Hamburger Bread", "requiredState": ["Cut"]},
+        {"name": "Bun", "requiredState": ["Cut"]},
         {"name": "Meat", "requiredState": ["Cut", "Fried"]}
         
       ]
@@ -13,7 +13,7 @@
       "name": "Cheeseburger",
       "canDeliver": true,
       "requiredIngredients": [
-        {"name": "Hamburger Bread", "requiredState": ["Cut"]},
+        {"name": "Bun", "requiredState": ["Cut"]},
         {"name": "Meat", "requiredState": ["Cut", "Fried"]},
         {"name": "Cheese", "requiredState": ["Cut", "Fried"]}
         
@@ -23,7 +23,7 @@
       "name": "Lettuce Hamburger",
       "canDeliver": true,
       "requiredIngredients": [
-        {"name": "Hamburger Bread", "requiredState": ["Cut"]},
+        {"name": "Bun", "requiredState": ["Cut"]},
         {"name": "Meat", "requiredState": ["Cut", "Fried"]},
         {"name": "Lettuce", "requiredState": ["Cut"]}
         
@@ -33,7 +33,7 @@
       "name": "Supreme Hamburger",
       "canDeliver": true,
       "requiredIngredients": [
-        {"name": "Hamburger Bread", "requiredState": ["Cut"]},
+        {"name": "Bun", "requiredState": ["Cut"]},
         {"name": "Meat", "requiredState": ["Cut", "Fried"]},
         {"name": "Lettuce", "requiredState": ["Cut"]},
         {"name": "Tomato", "requiredState": ["Cut"]},

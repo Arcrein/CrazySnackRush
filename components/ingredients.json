@@ -1,7 +1,7 @@
 {
     "Ingredients" : [
         {                          
-            "name": "Hamburger Bread",
+            "name": "Bun",
             "type": "BreadsAndBases",
             "canCut": true,
             "canMix": false,

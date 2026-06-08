@@ -7,7 +7,7 @@ import components.Furniture as F
 import components.Ingredient as I
 import asyncio
 import time
-
+from components.Ingredient import Ingredient, load_ingredients
 
 
 
@@ -49,6 +49,7 @@ class InteractResponse(BaseModel):
 class GameState:
     def __init__(self):
         self.kitchen = kitchen()
+        self.kitchen.ingredientList = load_ingredients()
         self.lock = asyncio.Lock()
         
 @asynccontextmanager
@@ -64,22 +65,10 @@ async def gameStart(data: kitchenStartRequest, request: Request):
     game: GameState  = request.app.state.game
     async with game.lock: 
         game.kitchen.furnitureList.clear()
+
         for item in data.furnitures:
             if item.type == "BunIngredientBox":
-                game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains=I.Ingredient(
-                    isCut= False,
-                    isTrash= False,
-                    isMixed= False,
-                    isFried= False,
-                    isDeepFried= False,
-                    isBoiled= False,
-                    canCut= False,
-                    canMix= False,
-                    canFry= False,
-                    canDeepFry= False,
-                    canBoil= False,
-                    name= "Bun"
-                )))
+                game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains = game.kitchen.getIngredient("Bun")))
     return SimpleResponse(bSuccess=True, Message="ok")
 
 @app.post("/game/interact", response_model=InteractResponse)
