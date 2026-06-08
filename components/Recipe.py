@@ -14,6 +14,7 @@ class Recipe(BaseModel):
     requiredIngredients: List[RecipeIngredient] = []
     currentPoints: int = 0
     timeRemaining: float = 0.0
+    canDeliver: bool = False
 
 def load_ingredients():         #funcion para cargar los ingredientes y traducirlos a una lista de python 
     with open ("ingredients.json") as file:
