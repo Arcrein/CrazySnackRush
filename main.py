@@ -45,7 +45,7 @@ async def gameStart(data: kitchenStartRequest, request: Request):
 async def interact_with_station(data: F.InteractRequest, request: Request):
     game: GameState  = request.app.state.game
     async with game.lock: 
-        ingredient = data.heldIngredient
+        ingredient = data.held
         station = game.kitchen.get_furniture(data.stationId)
 
         if station != None:
@@ -59,7 +59,7 @@ async def interact_with_station(data: F.InteractRequest, request: Request):
     #            bSuccess=True,
     #            Message=f"{ingredient.Name} fue cortado.",
     #            Score=0,
-    #            UpdatedHeldIngredient=ingredient,
+    #            Updatedheld=ingredient,
     #            ActiveRecipes=[]
     #        )
 #
@@ -67,7 +67,7 @@ async def interact_with_station(data: F.InteractRequest, request: Request):
     #        bSuccess=False,
     #        Message="Esta estación solo puede cortar vegetales crudos.",
     #        Score=0,
-    #        UpdatedHeldIngredient=ingredient,
+    #        Updatedheld=ingredient,
     #        ActiveRecipes=[]
     #    )
 
@@ -75,6 +75,6 @@ async def interact_with_station(data: F.InteractRequest, request: Request):
         bSuccess=False,
         Message="La estación no tiene una acción válida.",
         Score=0,
-        UpdatedHeldIngredient=ingredient,
+        Updatedheld=ingredient,
         ActiveRecipes=[]
     )
