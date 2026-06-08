@@ -3,6 +3,12 @@ from typing import List
 import json
 from components.Ingredient import Ingredient
 
+class RecipeDto(BaseModel):
+    RecipeId: str = ""
+    Name: str = ""
+    RequiredIngredients: List[Ingredient] = []
+    CurrentPoints: int = 0
+    TimeRemaining: float = 0.0
 
 class RecipeIngredient(BaseModel):
     name: str = ""

@@ -20,6 +20,10 @@ class Ingredient(BaseModel):
     canBurn: bool = False
     name: str = ""
 
+class IngredientDto(BaseModel):
+    name: str = ""
+    state: str = ""
+
 class VegetablesAndFruits(Ingredient):
     pass
 

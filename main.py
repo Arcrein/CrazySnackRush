@@ -9,42 +9,12 @@ import asyncio
 import time
 from components.Ingredient import Ingredient, load_ingredients
 
-
-
-class IngredientDto(BaseModel):
-    name: str = ""
-    type: str = ""
-    state: str = ""
-
-
-class RecipeDto(BaseModel):
-    RecipeId: str = ""
-    Name: str = ""
-    RequiredIngredients: List[IngredientDto] = []
-    CurrentPoints: int = 0
-    TimeRemaining: float = 0.0
-
 class kitchenStartRequest(BaseModel):
     furnitures: List[F.Furniture] = []
     
 class SimpleResponse(BaseModel):
     bSuccess: bool
     Message: str
-
-class InteractRequest(BaseModel):
-    chefId: int
-    stationId: int
-    action: str
-    heldIngredient: IngredientDto
-
-
-class InteractResponse(BaseModel):
-    bSuccess: bool
-    Message: str
-    Score: int
-    UpdatedHeldIngredient: IngredientDto
-    ActiveRecipes: List[RecipeDto]
-
 
 class GameState:
     def __init__(self):
@@ -71,44 +41,37 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                 game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains = game.kitchen.getIngredient("Bun")))
     return SimpleResponse(bSuccess=True, Message="ok")
 
-@app.post("/game/interact", response_model=InteractResponse)
-async def interact_with_station(data: InteractRequest, request: Request):
+@app.post("/game/interact", response_model=F.InteractResponse)
+async def interact_with_station(data: F.InteractRequest, request: Request):
     game: GameState  = request.app.state.game
     async with game.lock: 
         ingredient = data.heldIngredient
         station = game.kitchen.get_furniture(data.stationId)
 
         if station != None:
-            ingredient = station.held
-            return InteractResponse(
-                bSuccess=True,
-                Message="Chef tomó un tomate.",
-                Score=0,
-                UpdatedHeldIngredient=ingredient,
-                ActiveRecipes=[]
-            )
+           return station.doInteract(data)
 
-    if request.stationId.startswith("cutting_board"):
-        if ingredient.type == "Vegetal" and ingredient.state == "Crudo":
-            ingredient.state = "Cortado"
+    #if request.stationId.startswith("cutting_board"):
+    #    if ingredient.type == "Vegetal" and ingredient.state == "Crudo":
+    #        ingredient.state = "Cortado"
+#
+    #        return F.InteractResponse(
+    #            bSuccess=True,
+    #            Message=f"{ingredient.Name} fue cortado.",
+    #            Score=0,
+    #            UpdatedHeldIngredient=ingredient,
+    #            ActiveRecipes=[]
+    #        )
+#
+    #    return F.InteractResponse(
+    #        bSuccess=False,
+    #        Message="Esta estación solo puede cortar vegetales crudos.",
+    #        Score=0,
+    #        UpdatedHeldIngredient=ingredient,
+    #        ActiveRecipes=[]
+    #    )
 
-            return InteractResponse(
-                bSuccess=True,
-                Message=f"{ingredient.Name} fue cortado.",
-                Score=0,
-                UpdatedHeldIngredient=ingredient,
-                ActiveRecipes=[]
-            )
-
-        return InteractResponse(
-            bSuccess=False,
-            Message="Esta estación solo puede cortar vegetales crudos.",
-            Score=0,
-            UpdatedHeldIngredient=ingredient,
-            ActiveRecipes=[]
-        )
-
-    return InteractResponse(
+    return F.InteractResponse(
         bSuccess=False,
         Message="La estación no tiene una acción válida.",
         Score=0,
