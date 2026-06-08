@@ -33,6 +33,6 @@ class others(Ingredient):
     pass
 
 def load_ingredients():         #funcion para cargar los ingredientes y traducirlos a una lista de python 
-    with open ("ingredients.json") as file:
+    with open ("components/ingredients.json") as file:
         data = json.load(file)
         return [Ingredient(**ingredient) for ingredient in data["Ingredients"]]
