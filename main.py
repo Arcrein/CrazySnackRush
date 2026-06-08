@@ -59,7 +59,7 @@ async def interact_with_station(data: F.InteractRequest, request: Request):
     #            bSuccess=True,
     #            Message=f"{ingredient.Name} fue cortado.",
     #            Score=0,
-    #            Updatedheld=ingredient,
+    #            UpdatedHeld=ingredient,
     #            ActiveRecipes=[]
     #        )
 #
@@ -67,7 +67,7 @@ async def interact_with_station(data: F.InteractRequest, request: Request):
     #        bSuccess=False,
     #        Message="Esta estación solo puede cortar vegetales crudos.",
     #        Score=0,
-    #        Updatedheld=ingredient,
+    #        UpdatedHeld=ingredient,
     #        ActiveRecipes=[]
     #    )
 
@@ -75,6 +75,6 @@ async def interact_with_station(data: F.InteractRequest, request: Request):
         bSuccess=False,
         Message="La estación no tiene una acción válida.",
         Score=0,
-        Updatedheld=ingredient,
+        UpdatedHeld=ingredient,
         ActiveRecipes=[]
     )
