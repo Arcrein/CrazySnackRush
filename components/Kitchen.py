@@ -13,16 +13,22 @@ class kitchen(BaseModel):
     order_list: List[Orden] = []
     time_remaining: float = 0.0
     points: int = 0
+    
+    def get_furniture(self, station_id: int):
+        for furniture in self.furnitureList:
+            if furniture.stationId == station_id:
+                return furniture
+        return None
 
-def generate_random_order(kitchen: kitchen):
-    recipes = load_recipes()
-    if len(kitchen.order_list) == 0 and kitchen.time_remaining > 40: #si no hay ordenes y el tiempo resante es mayor a 40 segundos, se genera una nueva orden
-        random_recipe = random.choice(recipes)
-        new_order = Orden(recipe=random_recipe, status=False)
-        kitchen.order_list.append(new_order)
-    elif len(kitchen.order_list) != 0 and len(kitchen.order_list) < 5 and kitchen.time_remaining > 40: #si hay ordenes, pero no mas de 4 y el tiempo restante es mayor a 40 segundos, genera una nueva orden cada 50 segundos
-        if int(kitchen.time_remaining) % 50 == 0:
+    def generate_random_order(self):
+        recipes = load_recipes()
+        if len(self.order_list) == 0 and self.time_remaining > 40: #si no hay ordenes y el tiempo resante es mayor a 40 segundos, se genera una nueva orden
             random_recipe = random.choice(recipes)
             new_order = Orden(recipe=random_recipe, status=False)
-            kitchen.order_list.append(new_order)
+            self.order_list.append(new_order)
+        elif len(self.order_list) != 0 and len(self.order_list) < 5 and self.time_remaining > 40: #si hay ordenes, pero no mas de 4 y el tiempo restante es mayor a 40 segundos, genera una nueva orden cada 50 segundos
+            if int(self.time_remaining) % 50 == 0:
+                random_recipe = random.choice(recipes)
+                new_order = Orden(recipe=random_recipe, status=False)
+                self.order_list.append(new_order)
         

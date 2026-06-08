@@ -63,6 +63,7 @@ app = FastAPI(lifespan=lifeSpan)
 async def gameStart(data: kitchenStartRequest, request: Request):
     game: GameState  = request.app.state.game
     async with game.lock: 
+        game.kitchen.furnitureList.clear()
         for item in data.furnitures:
             if item.type == "BunIngredientBox":
                 game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains=I.Ingredient(
@@ -82,23 +83,21 @@ async def gameStart(data: kitchenStartRequest, request: Request):
     return SimpleResponse(bSuccess=True, Message="ok")
 
 @app.post("/game/interact", response_model=InteractResponse)
-def interact_with_station(request: InteractRequest):
-    ingredient = request.heldIngredient
+async def interact_with_station(data: InteractRequest, request: Request):
+    game: GameState  = request.app.state.game
+    async with game.lock: 
+        ingredient = data.heldIngredient
+        station = game.kitchen.get_furniture(data.stationId)
 
-    if request.stationId.startswith("pantry_tomato"):
-        ingredient = IngredientDto(
-            name="Tomate",
-            type="Vegetal",
-            state="Crudo"
-        )
-
-        return InteractResponse(
-            bSuccess=True,
-            Message="Chef tomó un tomate.",
-            Score=0,
-            UpdatedHeldIngredient=ingredient,
-            ActiveRecipes=[]
-        )
+        if station != None:
+            ingredient = station.held
+            return InteractResponse(
+                bSuccess=True,
+                Message="Chef tomó un tomate.",
+                Score=0,
+                UpdatedHeldIngredient=ingredient,
+                ActiveRecipes=[]
+            )
 
     if request.stationId.startswith("cutting_board"):
         if ingredient.type == "Vegetal" and ingredient.state == "Crudo":
