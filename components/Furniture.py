@@ -21,7 +21,7 @@ class InteractResponse(BaseModel):
 class Furniture(BaseModel):
     stationId: int = 0
     type: str = "Table"
-    held: ObjectDto = None
+    held: ObjectDto
 
     def doInteract() -> InteractResponse:
         pass
@@ -30,7 +30,7 @@ class IngredientBox(Furniture):
     contains: Ingredient 
 
     def doInteract(self, request: InteractRequest) -> InteractResponse:
-        if self.held == None and request.held == None:
+        if self.held.name == "" and request.held.name == "":
             ingredient = ObjectDto(name = self.contains.name)
             return InteractResponse(
                 bSuccess=True,
@@ -39,7 +39,7 @@ class IngredientBox(Furniture):
                 UpdatedHeld=ingredient,
                 ActiveRecipes=[]
             )
-        elif self.held != None and request.held == None:
+        elif self.held.name != "" and request.held.name == "":
             ingredient = ObjectDto(name = self.held.name)
             self.held = None
             return InteractResponse(
@@ -49,16 +49,16 @@ class IngredientBox(Furniture):
                 UpdatedHeld=ingredient,
                 ActiveRecipes=[]
             )
-        elif self.held == None and request.held != None:
+        elif self.held.name == "" and request.held.name != "":
             self.held = request.held
             return InteractResponse(
                 bSuccess=True,
                 Message="Caja ha tomado un tomate.",
                 Score=0,
-                UpdatedHeld=None,
+                UpdatedHeld=ObjectDto(),
                 ActiveRecipes=[]
             )
-        elif self.held != None and request.held != None:
+        elif self.held.name != "" and request.held.name != "":
             return InteractResponse(
                 bSuccess=False,
                 Message="Nadie tomo nada.",
