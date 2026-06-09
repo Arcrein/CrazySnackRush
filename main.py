@@ -41,7 +41,7 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                 nuevo = game.kitchen.getIngredient("Bun")
                 game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains = nuevo))
             if item.type == "MeatIngredientBox":
-                nuevo = game.kitchen.getIngredient("Bun")
+                nuevo = game.kitchen.getIngredient("Meat")
                 game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains = nuevo))
 
     print("LISTA final al salir:", game.kitchen.furnitureList)
