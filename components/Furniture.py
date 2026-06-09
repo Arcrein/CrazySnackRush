@@ -3,7 +3,6 @@ from typing import List
 from components.core import ObjectDto
 from components.Ingredient import Ingredient, IngredientDto
 from components.Recipe import RecipeDto
-from components.Kitchen import kitchen
 from datetime import datetime, timedelta
 
 
@@ -29,13 +28,13 @@ class Furniture(BaseModel):
     type: str = "Table"
     held: ObjectDto = ObjectDto()
 
-    def doInteract(self, request: InteractRequest, kitchen: kitchen) -> InteractResponse:
+    def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
         pass
 
 class IngredientBox(Furniture):
     contains: Ingredient 
 
-    def doInteract(self, request: InteractRequest, kitchen: kitchen) -> InteractResponse:
+    def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
         if self.held.name == "" and request.held.name == "":
             ingredient = ObjectDto(name = self.contains.name)
             return InteractResponse(
@@ -82,7 +81,7 @@ class cuttingBoard(Furniture):
     cuttingStartTime: datetime
     cuttingDeltaTime: float = 0
 
-    def doInteract(self, request: InteractRequest, kitchen: kitchen) -> InteractResponse:
+    def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
         if self.held.name != "" and request.held.name != "":
             return InteractResponse(
                 bSuccess=False,

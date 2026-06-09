@@ -105,7 +105,7 @@ async def interact_with_station(data: F.InteractRequest, request: Request):
         station = game.kitchen.get_furniture(data.stationId)
 
         if station is not None:
-            response = station.doInteract(data)
+            response = station.doInteract(data,game.kitchen.ingredientList)
             return response
 
     return F.InteractResponse(
