@@ -85,6 +85,14 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                     contains=nuevo
                 )
                 game.kitchen.furnitureList.append(box)
+            
+            if item.type == "CuttingTable":
+                box = F.cuttingBoard(
+                    stationId=item.stationId,
+                    type=item.type,
+                    held=item.held
+                )
+                game.kitchen.furnitureList.append(box)
 
     return SimpleResponse(bSuccess=True, Message="ok")
 
