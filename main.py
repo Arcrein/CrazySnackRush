@@ -35,9 +35,6 @@ app = FastAPI(lifespan=lifeSpan)
 async def gameStart(data: kitchenStartRequest, request: Request):
     game: GameState = request.app.state.game
     async with game.lock:
-        print("=== GAME START ===")
-        print("furnitures recibidos:", [(x.type, x.stationId) for x in data.furnitures])
-
         game.kitchen.furnitureList.clear()
 
         for item in data.furnitures:
@@ -51,7 +48,6 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                     contains=nuevo
                 )
                 game.kitchen.furnitureList.append(box)
-                print("Agregada caja Bun:", box.stationId, box.type, box.contains.name)
 
             if item.type == "MeatIngredientBox":
                 nuevo = game.kitchen.getIngredient("Meat")
@@ -61,10 +57,33 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                     contains=nuevo
                 )
                 game.kitchen.furnitureList.append(box)
-                print("Agregada caja Meat:", box.stationId, box.type, box.contains.name)
+            
+            if item.type == "CabbageIngredientBox":
+                nuevo = game.kitchen.getIngredient("Cabbage")
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                game.kitchen.furnitureList.append(box)
+            
+            if item.type == "TomatoIngredientBox":
+                nuevo = game.kitchen.getIngredient("Tomato")
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                game.kitchen.furnitureList.append(box)
 
-        print("LISTA FINAL START:",
-              [(f.type, f.stationId, f.contains.name) for f in game.kitchen.furnitureList])
+            if item.type == "CheeseIngredientBox":
+                nuevo = game.kitchen.getIngredient("Cheese")
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                game.kitchen.furnitureList.append(box)
 
     return SimpleResponse(bSuccess=True, Message="ok")
 
@@ -73,22 +92,13 @@ async def gameStart(data: kitchenStartRequest, request: Request):
 async def interact_with_station(data: F.InteractRequest, request: Request):
     game: GameState = request.app.state.game
     async with game.lock:
-        print("=== INTERACT ===")
-        print("stationId recibido:", data.stationId)
-        print("held recibido:", data.held)
-
-        print("LISTA ACTUAL:",
-              [(f.type, f.stationId, f.contains.name) for f in game.kitchen.furnitureList])
 
         station = game.kitchen.get_furniture(data.stationId)
-        print("station encontrada:", station)
 
         if station is not None:
             response = station.doInteract(data)
-            print("respuesta:", response)
             return response
 
-    print("NO SE ENCONTRO STATION PARA:", data.stationId)
     return F.InteractResponse(
         bSuccess=False,
         Message="La estación no tiene una acción válida.",
