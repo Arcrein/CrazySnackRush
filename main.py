@@ -31,56 +31,68 @@ async def lifeSpan(app:FastAPI):
 app = FastAPI(lifespan=lifeSpan)
 
 @app.post("/game/start", response_model=SimpleResponse)
+@app.post("/game/start", response_model=SimpleResponse)
 async def gameStart(data: kitchenStartRequest, request: Request):
-    game: GameState  = request.app.state.game
-    async with game.lock: 
+    game: GameState = request.app.state.game
+    async with game.lock:
+        print("=== GAME START ===")
+        print("furnitures recibidos:", [(x.type, x.stationId) for x in data.furnitures])
+
         game.kitchen.furnitureList.clear()
 
         for item in data.furnitures:
+            print("Procesando item:", item.type, item.stationId)
+
             if item.type == "BunIngredientBox":
                 nuevo = game.kitchen.getIngredient("Bun")
-                game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains = nuevo))
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                game.kitchen.furnitureList.append(box)
+                print("Agregada caja Bun:", box.stationId, box.type, box.contains.name)
+
             if item.type == "MeatIngredientBox":
                 nuevo = game.kitchen.getIngredient("Meat")
-                game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains = nuevo))
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                game.kitchen.furnitureList.append(box)
+                print("Agregada caja Meat:", box.stationId, box.type, box.contains.name)
 
-    print("LISTA final al salir:", game.kitchen.furnitureList)
+        print("LISTA FINAL START:",
+              [(f.type, f.stationId, f.contains.name) for f in game.kitchen.furnitureList])
+
     return SimpleResponse(bSuccess=True, Message="ok")
 
 @app.post("/game/interact", response_model=F.InteractResponse)
+@app.post("/game/interact", response_model=F.InteractResponse)
 async def interact_with_station(data: F.InteractRequest, request: Request):
-    game: GameState  = request.app.state.game
-    async with game.lock: 
-        ingredient = data.held
+    game: GameState = request.app.state.game
+    async with game.lock:
+        print("=== INTERACT ===")
+        print("stationId recibido:", data.stationId)
+        print("held recibido:", data.held)
+
+        print("LISTA ACTUAL:",
+              [(f.type, f.stationId, f.contains.name) for f in game.kitchen.furnitureList])
+
         station = game.kitchen.get_furniture(data.stationId)
+        print("station encontrada:", station)
 
-        if station != None:
-           return station.doInteract(data)
+        if station is not None:
+            response = station.doInteract(data)
+            print("respuesta:", response)
+            return response
 
-    #if request.stationId.startswith("cutting_board"):
-    #    if ingredient.type == "Vegetal" and ingredient.state == "Crudo":
-    #        ingredient.state = "Cortado"
-#
-    #        return F.InteractResponse(
-    #            bSuccess=True,
-    #            Message=f"{ingredient.Name} fue cortado.",
-    #            Score=0,
-    #            UpdatedHeld=ingredient,
-    #            ActiveRecipes=[]
-    #        )
-#
-    #    return F.InteractResponse(
-    #        bSuccess=False,
-    #        Message="Esta estación solo puede cortar vegetales crudos.",
-    #        Score=0,
-    #        UpdatedHeld=ingredient,
-    #        ActiveRecipes=[]
-    #    )
-
+    print("NO SE ENCONTRO STATION PARA:", data.stationId)
     return F.InteractResponse(
         bSuccess=False,
         Message="La estación no tiene una acción válida.",
         Score=0,
-        UpdatedHeld=ingredient,
+        UpdatedHeld=data.held,
         ActiveRecipes=[]
     )
