@@ -48,6 +48,7 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                     contains=nuevo
                 )
                 game.kitchen.furnitureList.append(box)
+                print("ingrediente encontrado:", nuevo)
 
             if item.type == "MeatIngredientBox":
                 nuevo = game.kitchen.getIngredient("Meat")
@@ -58,8 +59,8 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                 )
                 game.kitchen.furnitureList.append(box)
             
-            if item.type == "CabbageIngredientBox":
-                nuevo = game.kitchen.getIngredient("Cabbage")
+            if item.type == "LettuceIngredientBox":
+                nuevo = game.kitchen.getIngredient("Lettuce")
                 box = F.IngredientBox(
                     stationId=item.stationId,
                     type=item.type,
