@@ -38,7 +38,13 @@ async def gameStart(data: kitchenStartRequest, request: Request):
 
         for item in data.furnitures:
             if item.type == "BunIngredientBox":
-                game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains = game.kitchen.getIngredient("Bun")))
+                nuevo = game.kitchen.getIngredient("Bun")
+                game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains = nuevo))
+            if item.type == "MeatIngredientBox":
+                nuevo = game.kitchen.getIngredient("Bun")
+                game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains = nuevo))
+
+    print("LISTA final al salir:", game.kitchen.furnitureList)
     return SimpleResponse(bSuccess=True, Message="ok")
 
 @app.post("/game/interact", response_model=F.InteractResponse)

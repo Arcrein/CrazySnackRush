@@ -5,23 +5,23 @@ from components.Ingredient import Ingredient, IngredientDto
 from components.Recipe import RecipeDto
 
 class InteractRequest(BaseModel):
-    chefId: int
-    stationId: int
-    action: str
-    held: ObjectDto
+    chefId: int = -1
+    stationId: int = -1
+    action: str = ""
+    held: ObjectDto = ObjectDto()
 
 
 class InteractResponse(BaseModel):
-    bSuccess: bool
-    Message: str
-    Score: int
-    UpdatedHeld: ObjectDto
-    ActiveRecipes: List[RecipeDto]
+    bSuccess: bool = False
+    Message: str = ""
+    Score: int = 0
+    UpdatedHeld: ObjectDto = ObjectDto()
+    ActiveRecipes: List[RecipeDto] = []
 
 class Furniture(BaseModel):
     stationId: int = 0
     type: str = "Table"
-    held: ObjectDto
+    held: ObjectDto = ObjectDto()
 
     def doInteract() -> InteractResponse:
         pass
