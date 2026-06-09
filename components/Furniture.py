@@ -9,6 +9,12 @@ from datetime import datetime, timedelta
 CUTTINGTIME = 2.0
 COOKINGTIME = 12.0
 
+def getIngredient(ingredientList: List[Ingredient], name: str):
+        for ing in ingredientList:
+            if ing.name == name:
+                return ing
+        return None
+
 class InteractRequest(BaseModel):
     chefId: int = -1
     stationId: int = -1
@@ -96,13 +102,13 @@ class cuttingBoard(Furniture):
             self.cuttingDeltaTime = 0
             return InteractResponse(
                 bSuccess=True,
-                Message="Si funca.",
+                Message="transfer",
                 Score=0,
                 UpdatedHeld=ObjectDto(),
                 ActiveRecipes=[]
                 )
         elif self.held.name != "" and request.held.name == "" and request.action == "activate":
-            ingrediente = kitchen.getIngredient(self.held.name)
+            ingrediente = getIngredient(ingredientList, self.held.name)
             if ingrediente != None and ingrediente.canCut:
                 self.isCutting = True
                 self.cuttingStartTime = datetime.now()
@@ -155,7 +161,7 @@ class cuttingBoard(Furniture):
                 self.held = ObjectDto()
                 return InteractResponse(
                     bSuccess=True,
-                    Message="Funco.",
+                    Message="transfer",
                     Score=0,
                     UpdatedHeld=newIngredient,
                     ActiveRecipes=[]
