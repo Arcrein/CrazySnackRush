@@ -93,6 +93,14 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                     held=item.held
                 )
                 game.kitchen.furnitureList.append(box)
+            
+            if item.type == "Table":
+                box = F.table(
+                    stationId=item.stationId,
+                    type=item.type,
+                    held=item.held
+                )
+                game.kitchen.furnitureList.append(box)
 
     return SimpleResponse(bSuccess=True, Message="ok")
 

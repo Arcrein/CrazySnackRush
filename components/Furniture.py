@@ -84,7 +84,7 @@ class burner(Furniture):
 
 class cuttingBoard(Furniture):
     isCutting: bool = False
-    cuttingStartTime: datetime
+    cuttingStartTime: datetime = datetime.now()
     cuttingDeltaTime: float = 0
 
     def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
@@ -188,7 +188,44 @@ class servingStation(Furniture):
     pass
 
 class table(Furniture):
-    pass
+    def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
+        if self.held.name != "" and request.held.name != "":
+            return InteractResponse(
+                bSuccess=False,
+                Message="No funca.",
+                Score=0,
+                UpdatedHeld=request.held,
+                ActiveRecipes=[]
+            )
+
+        elif self.held.name == "" and request.held.name != "" and request.action == "interact":
+            self.held = request.held
+            return InteractResponse(
+                bSuccess=True,
+                Message="transfer",
+                Score=0,
+                UpdatedHeld=ObjectDto(),
+                ActiveRecipes=[]
+            )
+
+        elif self.held.name != "" and request.held.name == "" and request.action == "interact":
+            newIngredient = ObjectDto(name=self.held.name, state=self.held.state)
+            self.held = ObjectDto()
+            return InteractResponse(
+                bSuccess=True,
+                Message="transfer",
+                Score=0,
+                UpdatedHeld=newIngredient,
+                ActiveRecipes=[]
+            )
+
+        return InteractResponse(
+            bSuccess=False,
+            Message="No funca.",
+            Score=0,
+            UpdatedHeld=request.held,
+            ActiveRecipes=[]
+        )
 
 class sink(Furniture):
     pass
