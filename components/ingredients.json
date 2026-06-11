@@ -3,7 +3,7 @@
         {                          
             "name": "Bun",
             "type": "BreadsAndBases",
-            "canCut": true,
+            "canCut": false,
             "canMix": false,
             "canFry": false,
             "canBoil": false,

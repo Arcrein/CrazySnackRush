@@ -2,6 +2,7 @@
 from pydantic import BaseModel
 from typing import List
 import json
+from components.core import IngredientDto
 
 class Ingredient(BaseModel):
     type: str = ""
@@ -19,10 +20,6 @@ class Ingredient(BaseModel):
     canBoil: bool = False
     canBurn: bool = False
     name: str = ""
-
-class IngredientDto(BaseModel):
-    name: str = ""
-    state: str = ""
 
 class VegetablesAndFruits(Ingredient):
     pass
