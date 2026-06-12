@@ -5,7 +5,9 @@ import json
 from components.core import IngredientDto
 
 class Ingredient(BaseModel):
+    state: str = ""
     type: str = ""
+    isReady: bool = False
     isCut: bool = False
     isTrash: bool = False
     isMixed: bool = False
@@ -19,6 +21,12 @@ class Ingredient(BaseModel):
     canDeepFry: bool = False
     canBoil: bool = False
     canBurn: bool = False
+    cutResult: str = ""
+    mixResult: str = ""
+    fryResult: str = ""
+    deepFryResult: str = ""
+    boilResult: str = ""
+    burnResult: str = ""
     name: str = ""
 
 class VegetablesAndFruits(Ingredient):

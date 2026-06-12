@@ -1,167 +1,299 @@
 {
-    "Ingredients" : [
-        {                          
+    "Ingredients": [
+        {
             "name": "Bun",
             "type": "BreadsAndBases",
-            "canCut": false,
-            "canMix": false,
-            "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,
+            "canCut": true,
+            "cutResult": "CuttedBun",
             "canBurn": true
-
+        },
+        {
+            "name": "BurnedBun",
+            "state": "Burned",
+            "type": "BreadsAndBases"
         },
         {
             "name": "Meat",
             "type": "Proteins",
             "canCut": true,
             "canMix": true,
-            "canFry": true,
-            "canBoil": false,
-            "canDeepFry": false,
+            "cutResult": "CuttedMeat",
             "canBurn": true
+        },
+        {
+            "name": "CuttedMeat",
+            "state": "Cut",
+            "type": "Proteins",
+            "canFry": true,
+            "fryResult": "CookedMeat",
+            "canBurn": true
+        },
+        {
+            "name": "CookedMeat",
+            "state": "Fried",
+            "type": "Proteins",
+            "isReady": true,
+            "canBurn": true,
+            "burnResult": "BurnedMeat"
+        },
+        {
+            "name": "BurnedMeat",
+            "state": "Burned",
+            "type": "Proteins"
         },
         {
             "name": "Lettuce",
             "type": "VegetablesAndFruits",
             "canCut": true,
             "canMix": true,
-            "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,
+            "cutResult": "CuttedLettuce",
             "canBurn": true
+        },
+        {
+            "name": "CuttedLettuce",
+            "state": "Cut",
+            "type": "VegetablesAndFruits",
+            "isReady": true,
+            "canMix": true
         },
         {
             "name": "Tomato",
             "type": "VegetablesAndFruits",
             "canCut": true,
             "canMix": true,
-            "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,
+            "cutResult": "CuttedTomato",
             "canBurn": true
+        },
+        {
+            "name": "CuttedTomato",
+            "state": "Cut",
+            "type": "VegetablesAndFruits",
+            "isReady": true,
+            "canMix": true
         },
         {
             "name": "Cheese",
             "type": "others",
             "canCut": true,
             "canMix": true,
-            "canFry": true,
-            "canBoil": false,
-            "canDeepFry": false,
+            "cutResult": "CuttedCheese",
             "canBurn": true
+        },
+        {
+            "name": "CuttedCheese",
+            "state": "Cut",
+            "type": "others",
+            "canFry": true,
+            "fryResult": "CookedCheese",
+            "canBurn": true
+        },
+        {
+            "name": "CookedCheese",
+            "state": "Fried",
+            "type": "others",
+            "isReady": true,
+            "canBurn": true,
+            "burnResult": "BurnedCheese"
+        },
+        {
+            "name": "BurnedCheese",
+            "state": "Burned",
+            "type": "others"
         },
         {
             "name": "flour",
             "type": "others",
-            "canCut": false,
             "canMix": true,
-            "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,
             "canBurn": true
         },
         {
             "name": "Egg",
             "type": "Proteins",
-            "canCut": false,
             "canMix": true,
             "canFry": true,
+            "fryResult": "FriedEgg",
             "canBoil": true,
-            "canDeepFry": false,
+            "boilResult": "BoiledEgg",
             "canBurn": true
+        },
+        {
+            "name": "FriedEgg",
+            "state": "Fried",
+            "type": "Proteins",
+            "isReady": true,
+            "canBurn": true,
+            "burnResult": "BurnedEgg"
+        },
+        {
+            "name": "BoiledEgg",
+            "state": "Boiled",
+            "type": "Proteins",
+            "isReady": true,
+            "canBurn": true,
+            "burnResult": "BurnedEgg"
+        },
+        {
+            "name": "BurnedEgg",
+            "state": "Burned",
+            "type": "Proteins"
         },
         {
             "name": "Blueberry",
             "type": "VegetablesAndFruits",
             "canCut": true,
             "canMix": true,
-            "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,
-            "canBurn": true 
+            "cutResult": "CuttedBlueberry",
+            "canBurn": true
+        },
+        {
+            "name": "CuttedBlueberry",
+            "state": "Cut",
+            "type": "VegetablesAndFruits",
+            "isReady": true,
+            "canMix": true
         },
         {
             "name": "Chocolate",
             "type": "others",
-            "canCut": false,
+            "canCut": true,
             "canMix": true,
-            "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,
+            "cutResult": "CuttedChocolate",
             "canBurn": true
+        },
+        {
+            "name": "CuttedChocolate",
+            "state": "Cut",
+            "type": "others",
+            "isReady": true,
+            "canMix": true
         },
         {
             "name": "Strawberry",
             "type": "VegetablesAndFruits",
             "canCut": true,
             "canMix": true,
-            "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,
+            "cutResult": "CuttedStrawberry",
             "canBurn": true
         },
-
+        {
+            "name": "CuttedStrawberry",
+            "state": "Cut",
+            "type": "VegetablesAndFruits",
+            "isReady": true,
+            "canMix": true
+        },
         {
             "name": "Honeycomb",
             "type": "others",
             "canCut": true,
             "canMix": true,
-            "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,
+            "cutResult": "CuttedHoneycomb",
             "canBurn": true
+        },
+        {
+            "name": "CuttedHoneycomb",
+            "state": "Cut",
+            "type": "others",
+            "isReady": true,
+            "canMix": true
         },
         {
             "name": "Raspberry",
             "type": "VegetablesAndFruits",
             "canCut": true,
             "canMix": true,
-            "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,
+            "cutResult": "CuttedRaspberry",
             "canBurn": true
+        },
+        {
+            "name": "CuttedRaspberry",
+            "state": "Cut",
+            "type": "VegetablesAndFruits",
+            "isReady": true,
+            "canMix": true
         },
         {
             "name": "Nori",
             "type": "others",
             "canCut": true,
             "canMix": true,
-            "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,
+            "cutResult": "CuttedNori",
             "canBurn": true
+        },
+        {
+            "name": "CuttedNori",
+            "state": "Cut",
+            "type": "others",
+            "isReady": true,
+            "canMix": true
         },
         {
             "name": "Rice",
             "type": "BreadsAndBases",
-            "canCut": false,
             "canMix": true,
-            "canFry": false,
             "canBoil": true,
-            "canDeepFry": false,
+            "boilResult": "BoiledRice",
             "canBurn": true
+        },
+        {
+            "name": "BoiledRice",
+            "state": "Boiled",
+            "type": "BreadsAndBases",
+            "isReady": true,
+            "canBurn": true,
+            "burnResult": "BurnedRice"
+        },
+        {
+            "name": "BurnedRice",
+            "state": "Burned",
+            "type": "BreadsAndBases"
         },
         {
             "name": "Fish",
             "type": "Proteins",
             "canCut": true,
             "canMix": true,
-            "canFry": false,
+            "cutResult": "CuttedFish",
             "canBoil": true,
-            "canDeepFry": false,
+            "boilResult": "BoiledFish",
             "canBurn": true
+        },
+        {
+            "name": "CuttedFish",
+            "state": "Cut",
+            "type": "Proteins",
+            "isReady": true,
+            "canBoil": true,
+            "boilResult": "BoiledFish",
+            "canBurn": true
+        },
+        {
+            "name": "BoiledFish",
+            "state": "Boiled",
+            "type": "Proteins",
+            "isReady": true,
+            "canBurn": true,
+            "burnResult": "BurnedFish"
+        },
+        {
+            "name": "BurnedFish",
+            "state": "Burned",
+            "type": "Proteins"
         },
         {
             "name": "Cucumber",
             "type": "VegetablesAndFruits",
             "canCut": true,
             "canMix": true,
-            "canFry": false,
-            "canBoil": false,
-            "canDeepFry": false,
+            "cutResult": "CuttedCucumber",
             "canBurn": true
+        },
+        {
+            "name": "CuttedCucumber",
+            "state": "Cut",
+            "type": "VegetablesAndFruits",
+            "isReady": true,
+            "canMix": true
         }
-
     ]
 }

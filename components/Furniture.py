@@ -23,6 +23,40 @@ def getIngredient(ingredientList: List[Ingredient], name: str):
     return None
 
 
+def getTransformationResult(ingredient: Ingredient, work_type: str) -> str:
+    if work_type == "Cut":
+        return ingredient.cutResult
+    if work_type == "Mix":
+        return ingredient.mixResult
+    if work_type == "Fry":
+        return ingredient.fryResult
+    if work_type == "DeepFry":
+        return ingredient.deepFryResult
+    if work_type == "Boil":
+        return ingredient.boilResult
+    if work_type == "Burn":
+        return ingredient.burnResult
+    return ""
+
+
+def transformObject(obj: ObjectDto | IngredientDto, ingredientList: List[Ingredient], work_type: str) -> bool:
+    ingredient = getIngredient(ingredientList, obj.name)
+    if ingredient is None:
+        return False
+
+    result_name = getTransformationResult(ingredient, work_type)
+    if result_name == "":
+        return False
+
+    result_ingredient = getIngredient(ingredientList, result_name)
+    if result_ingredient is None:
+        return False
+
+    obj.name = result_ingredient.name
+    obj.state = result_ingredient.state
+    return True
+
+
 def isContainer(obj: ObjectDto) -> bool:
     return obj.name in ALL_CONTAINERS
 
@@ -45,10 +79,13 @@ def canAddToContainer(container: ObjectDto, obj: ObjectDto, ingredientList: List
     if len(container.held) >= containerCapacity(container):
         return False
 
-    if container.name in MULTI_SLOT_CONTAINERS:
+    ingredient = getIngredient(ingredientList, obj.name)
+    if container.name == "Plate":
+        return ingredient is not None and ingredient.isReady
+
+    if container.name == "Mug":
         return True
 
-    ingredient = getIngredient(ingredientList, obj.name)
     if ingredient is None:
         return False
 
@@ -76,13 +113,13 @@ def resetContainerWork(container: ObjectDto):
     container.lastStartTime = 0.0
 
 
-def getCookedState(container: ObjectDto) -> str:
+def getContainerWorkType(container: ObjectDto) -> str:
     if container.name == "Pot":
-        return "Boiled"
+        return "Boil"
     if container.name == "FryPan":
-        return "Fried"
+        return "Fry"
     if container.name in {"FryBasket", "FryBasquet"}:
-        return "DeepFried"
+        return "DeepFry"
     return ""
 
 
@@ -94,12 +131,11 @@ def finishContainerWorkIfReady(container: ObjectDto, ingredientList: List[Ingred
     ingredient = getIngredient(ingredientList, ingredient_obj.name)
 
     if ingredient is not None and ingredient.canBurn and container.progress >= BURNTIME:
-        ingredient_obj.state = "Burned"
-        return True
+        return transformObject(ingredient_obj, ingredientList, "Burn")
 
-    cooked_state = getCookedState(container)
-    if cooked_state != "" and container.progress >= COOKINGTIME:
-        ingredient_obj.state = cooked_state
+    work_type = getContainerWorkType(container)
+    if work_type != "" and container.progress >= COOKINGTIME:
+        transformObject(ingredient_obj, ingredientList, work_type)
 
     return False
 
@@ -138,21 +174,19 @@ def startContainerWork(container: ObjectDto, ingredientList: List[Ingredient]) -
 
     if ingredient is None:
         return False
-    if ingredient_obj.state == "Burned":
-        return False
     if container.progress >= BURNTIME:
         return False
 
     if container.name == "Pot":
-        if not ingredient.canBoil:
+        if not ingredient.canBoil or ingredient.boilResult == "":
             return False
         container.workType = "Boil"
     elif container.name == "FryPan":
-        if not ingredient.canFry:
+        if not ingredient.canFry or ingredient.fryResult == "":
             return False
         container.workType = "Fry"
     elif container.name in {"FryBasket", "FryBasquet"}:
-        if not ingredient.canDeepFry:
+        if not ingredient.canDeepFry or ingredient.deepFryResult == "":
             return False
         container.workType = "DeepFry"
 
@@ -239,7 +273,7 @@ class IngredientBox(Furniture):
 
     def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
         if self.held.name == "" and request.held.name == "":
-            ingredient = ObjectDto(name=self.contains.name)
+            ingredient = ObjectDto(name=self.contains.name, state=self.contains.state)
             return transferObjectResponse(ingredient)
 
         if self.held.name != "" and request.held.name == "":
@@ -319,7 +353,7 @@ class cuttingBoard(Furniture):
         if self.held.name != "" and request.held.name == "" and request.action == "activate":
             ingredient = getIngredient(ingredientList, self.held.name)
 
-            if ingredient is not None and ingredient.canCut and self.held.state != "Cut":
+            if ingredient is not None and ingredient.canCut and ingredient.cutResult != "":
                 self.isCutting = True
                 self.cuttingStartTime = datetime.now()
                 return clearHandResponse("Casi")
@@ -333,7 +367,7 @@ class cuttingBoard(Furniture):
                 percentage = int(self.cuttingDeltaTime / CUTTINGTIME * 100)
 
                 if percentage >= 100:
-                    self.held.state = "Cut"
+                    transformObject(self.held, ingredientList, "Cut")
 
                 return transferObjectResponse(
                     self.held,
