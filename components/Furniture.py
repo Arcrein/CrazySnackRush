@@ -10,10 +10,10 @@ CUTTINGTIME: float = 2.0
 COOKINGTIME: float = 12.0
 BURNTIME: float = COOKINGTIME * 2.0
 
-SINGLE_SLOT_CONTAINERS = {"Pot", "FryPan", "FryBasket", "FryBasquet"}
+SINGLE_SLOT_CONTAINERS = {"Pot", "FryPan", "FryBasket"}
 MULTI_SLOT_CONTAINERS = {"Plate", "Mug"}
 ALL_CONTAINERS = SINGLE_SLOT_CONTAINERS | MULTI_SLOT_CONTAINERS
-HEATED_CONTAINERS = {"Pot", "FryPan", "FryBasket", "FryBasquet"}
+HEATED_CONTAINERS = {"Pot", "FryPan", "FryBasket"}
 
 
 def getIngredient(ingredientList: List[Ingredient], name: str):
@@ -93,7 +93,7 @@ def canAddToContainer(container: ObjectDto, obj: ObjectDto, ingredientList: List
         return ingredient.canBoil
     if container.name == "FryPan":
         return ingredient.canFry
-    if container.name in {"FryBasket", "FryBasquet"}:
+    if container.name in {"FryBasket"}:
         return ingredient.canDeepFry
 
     return False
@@ -118,7 +118,7 @@ def getContainerWorkType(container: ObjectDto) -> str:
         return "Boil"
     if container.name == "FryPan":
         return "Fry"
-    if container.name in {"FryBasket", "FryBasquet"}:
+    if container.name in {"FryBasket"}:
         return "DeepFry"
     return ""
 
@@ -130,11 +130,11 @@ def finishContainerWorkIfReady(container: ObjectDto, ingredientList: List[Ingred
     ingredient_obj = container.held[0]
     ingredient = getIngredient(ingredientList, ingredient_obj.name)
 
-    if ingredient is not None and ingredient.canBurn and container.progress >= BURNTIME:
+    if ingredient is not None and ingredient.canBurn and container.progress >= 2:
         return transformObject(ingredient_obj, ingredientList, "Burn")
 
     work_type = getContainerWorkType(container)
-    if work_type != "" and container.progress >= COOKINGTIME:
+    if work_type != "" and container.progress >= 1:
         transformObject(ingredient_obj, ingredientList, work_type)
 
     return False
@@ -143,7 +143,7 @@ def finishContainerWorkIfReady(container: ObjectDto, ingredientList: List[Ingred
 def syncContainerWork(container: ObjectDto, ingredientList: List[Ingredient], pause_work: bool) -> bool:
     if container.isActive:
         now_ts = datetime.now().timestamp()
-        container.progress += now_ts - container.lastStartTime
+        container.progress += (now_ts - container.lastStartTime) / COOKINGTIME
 
         if pause_work:
             container.isActive = False
@@ -185,7 +185,7 @@ def startContainerWork(container: ObjectDto, ingredientList: List[Ingredient]) -
         if not ingredient.canFry or ingredient.fryResult == "":
             return False
         container.workType = "Fry"
-    elif container.name in {"FryBasket", "FryBasquet"}:
+    elif container.name in {"FryBasket"}:
         if not ingredient.canDeepFry or ingredient.deepFryResult == "":
             return False
         container.workType = "DeepFry"
@@ -266,6 +266,11 @@ class Furniture(BaseModel):
 
     def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
         return failResponse(request.held)
+
+    def sync(self, ingredientList: List[Ingredient]) -> bool:
+        if self.held.name in HEATED_CONTAINERS:
+            if syncContainerWork(self.held, ingredientList, pause_work=False):
+                self.isInFire = True
 
 
 class IngredientBox(Furniture):

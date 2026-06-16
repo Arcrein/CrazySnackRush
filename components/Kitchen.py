@@ -1,3 +1,5 @@
+from datetime import datetime, time
+
 from pydantic import BaseModel
 from typing import List
 from components.Orden import Orden
@@ -11,9 +13,10 @@ class kitchen(BaseModel):
     type: str = ""
     state: str = ""
     furnitureList: List[F.Furniture] = []
-    ingredientList: List[Ingredient] = []
+    #ingredientList: List[Ingredient] = []
     order_list: List[Orden] = []
     time_remaining: float = 0.0
+    start_time: float = 0.0
     points: int = 0
     
     def get_furniture(self, station_id: int):
@@ -22,11 +25,21 @@ class kitchen(BaseModel):
                 return furniture
         return None
     
-    def getIngredient(self, name: str):
-        for ing in self.ingredientList:
-            if ing.name == name:
-                return ing
-        return None
+
+    def start_game(self):
+        self.time_remaining = 240.0
+        self.start_time = datetime.now().timestamp()
+        self.points = 0
+        self.order_list.clear()
+        self.furnitureList.clear()
+
+    def update_time(self, ingredientList: List[Ingredient]):
+        now_ts = datetime.now().timestamp()
+        self.time_remaining -= now_ts - self.start_time
+        self.start_time = now_ts
+        for furniture in self.furnitureList:
+            furniture.sync(ingredientList)
+   
 
     def generate_random_order(self):
         recipes = load_recipes()

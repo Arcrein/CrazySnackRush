@@ -19,8 +19,14 @@ class SimpleResponse(BaseModel):
 class GameState:
     def __init__(self):
         self.kitchen = kitchen()
-        self.kitchen.ingredientList = load_ingredients()
+        self.ingredientList = load_ingredients()
         self.lock = asyncio.Lock()
+
+    def getIngredient(self, name: str):
+        for ing in self.ingredientList:
+            if ing.name == name:
+                return ing
+        return None
         
 @asynccontextmanager
 async def lifeSpan(app:FastAPI):
@@ -31,17 +37,16 @@ async def lifeSpan(app:FastAPI):
 app = FastAPI(lifespan=lifeSpan)
 
 @app.post("/game/start", response_model=SimpleResponse)
-@app.post("/game/start", response_model=SimpleResponse)
 async def gameStart(data: kitchenStartRequest, request: Request):
     game: GameState = request.app.state.game
     async with game.lock:
-        game.kitchen.furnitureList.clear()
+        game.kitchen.start_game()
 
         for item in data.furnitures:
             print("Procesando item:", item.type, item.stationId)
 
             if item.type == "BunIngredientBox":
-                nuevo = game.kitchen.getIngredient("Bun")
+                nuevo = game.getIngredient("Bun")
                 box = F.IngredientBox(
                     stationId=item.stationId,
                     type=item.type,
@@ -51,7 +56,7 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                 print("ingrediente encontrado:", nuevo)
 
             if item.type == "MeatIngredientBox":
-                nuevo = game.kitchen.getIngredient("Meat")
+                nuevo = game.getIngredient("Meat")
                 box = F.IngredientBox(
                     stationId=item.stationId,
                     type=item.type,
@@ -60,7 +65,7 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                 game.kitchen.furnitureList.append(box)
             
             if item.type == "LettuceIngredientBox":
-                nuevo = game.kitchen.getIngredient("Lettuce")
+                nuevo = game.getIngredient("Lettuce")
                 box = F.IngredientBox(
                     stationId=item.stationId,
                     type=item.type,
@@ -69,7 +74,7 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                 game.kitchen.furnitureList.append(box)
             
             if item.type == "TomatoIngredientBox":
-                nuevo = game.kitchen.getIngredient("Tomato")
+                nuevo = game.getIngredient("Tomato")
                 box = F.IngredientBox(
                     stationId=item.stationId,
                     type=item.type,
@@ -78,7 +83,7 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                 game.kitchen.furnitureList.append(box)
 
             if item.type == "CheeseIngredientBox":
-                nuevo = game.kitchen.getIngredient("Cheese")
+                nuevo = game.getIngredient("Cheese")
                 box = F.IngredientBox(
                     stationId=item.stationId,
                     type=item.type,
@@ -113,7 +118,6 @@ async def gameStart(data: kitchenStartRequest, request: Request):
     return SimpleResponse(bSuccess=True, Message="ok")
 
 @app.post("/game/interact", response_model=F.InteractResponse)
-@app.post("/game/interact", response_model=F.InteractResponse)
 async def interact_with_station(data: F.InteractRequest, request: Request):
     game: GameState = request.app.state.game
     async with game.lock:
@@ -121,7 +125,7 @@ async def interact_with_station(data: F.InteractRequest, request: Request):
         station = game.kitchen.get_furniture(data.stationId)
 
         if station is not None:
-            response = station.doInteract(data,game.kitchen.ingredientList)
+            response = station.doInteract(data,game.ingredientList)
             return response
 
     return F.InteractResponse(
@@ -131,3 +135,10 @@ async def interact_with_station(data: F.InteractRequest, request: Request):
         UpdatedHeld=data.held,
         ActiveRecipes=[]
     )
+
+@app.get("/game/interact", response_model=kitchen)
+async def getKitchenState(request: Request):
+    game: GameState = request.app.state.game
+    async with game.lock:
+            game.kitchen.update_time(game.ingredientList)
+            return game.kitchen
