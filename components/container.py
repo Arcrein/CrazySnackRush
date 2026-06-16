@@ -5,7 +5,8 @@ class container(BaseModel):
     type: str = ""
     content: list = []
     cookPercentage: int = 0
-    isINFIRE: bool = False
+    inFire: bool = False
+    dirty: bool = False
     
     def isEmpty(self):
         if len(self.content) == 0:
@@ -28,4 +29,9 @@ class container(BaseModel):
                 print (self.type," esta lleno")
  
     def isInFire(self):
-        isINFIRE = True
+        return self.inFire
+
+    def isDirty(self):
+        return self.dirty
+    
+    
