@@ -7,7 +7,19 @@ import components.Furniture as F
 import components.Ingredient as I
 import asyncio
 import time
-from components.Ingredient import Ingredient, load_ingredients
+from components.Recipe import load_recipes, load_ingredients
+
+class IngredientDto(BaseModel):
+    name: str = ""
+    type: str = ""
+    state: str = ""
+
+class RecipeDto(BaseModel):
+    RecipeId: str = ""
+    Name: str = ""
+    RequiredIngredients: List[IngredientDto] = []
+    CurrentPoints: int = 0
+    TimeRemaining: float = 0.0
 
 class kitchenStartRequest(BaseModel):
     furnitures: List[F.Furniture] = []
@@ -16,17 +28,23 @@ class SimpleResponse(BaseModel):
     bSuccess: bool
     Message: str
 
+class InteractRequest(BaseModel):
+    chefId: int
+    stationId: str
+    action: str
+    heldIngredient: IngredientDto
+
+class InteractResponse(BaseModel):
+    bSuccess: bool
+    Message: str
+    Score: int
+    UpdatedHeldIngredient: IngredientDto
+    ActiveRecipes: List[RecipeDto]
+
 class GameState:
     def __init__(self):
         self.kitchen = kitchen()
-        self.ingredientList = load_ingredients()
         self.lock = asyncio.Lock()
-
-    def getIngredient(self, name: str):
-        for ing in self.ingredientList:
-            if ing.name == name:
-                return ing
-        return None
         
 @asynccontextmanager
 async def lifeSpan(app:FastAPI):
@@ -36,109 +54,82 @@ async def lifeSpan(app:FastAPI):
 
 app = FastAPI(lifespan=lifeSpan)
 
+def find_ingredient(name: str):
+    all_ingredients = load_ingredients()
+    ingredient_data = next((i for i in all_ingredients if i.name == name), None)
+    return ingredient_data
+
 @app.post("/game/start", response_model=SimpleResponse)
 async def gameStart(data: kitchenStartRequest, request: Request):
     game: GameState = request.app.state.game
-    async with game.lock:
-        game.kitchen.start_game()
-
+    async with game.lock: 
         for item in data.furnitures:
-            print("Procesando item:", item.type, item.stationId)
-
             if item.type == "BunIngredientBox":
-                nuevo = game.getIngredient("Bun")
-                box = F.IngredientBox(
-                    stationId=item.stationId,
-                    type=item.type,
-                    contains=nuevo
-                )
-                game.kitchen.furnitureList.append(box)
-                print("ingrediente encontrado:", nuevo)
-
-            if item.type == "MeatIngredientBox":
-                nuevo = game.getIngredient("Meat")
-                box = F.IngredientBox(
-                    stationId=item.stationId,
-                    type=item.type,
-                    contains=nuevo
-                )
-                game.kitchen.furnitureList.append(box)
-            
-            if item.type == "LettuceIngredientBox":
-                nuevo = game.getIngredient("Lettuce")
-                box = F.IngredientBox(
-                    stationId=item.stationId,
-                    type=item.type,
-                    contains=nuevo
-                )
-                game.kitchen.furnitureList.append(box)
-            
-            if item.type == "TomatoIngredientBox":
-                nuevo = game.getIngredient("Tomato")
-                box = F.IngredientBox(
-                    stationId=item.stationId,
-                    type=item.type,
-                    contains=nuevo
-                )
-                game.kitchen.furnitureList.append(box)
-
-            if item.type == "CheeseIngredientBox":
-                nuevo = game.getIngredient("Cheese")
-                box = F.IngredientBox(
-                    stationId=item.stationId,
-                    type=item.type,
-                    contains=nuevo
-                )
-                game.kitchen.furnitureList.append(box)
-            
-            if item.type == "CuttingTable":
-                box = F.cuttingBoard(
-                    stationId=item.stationId,
-                    type=item.type,
-                    held=item.held
-                )
-                game.kitchen.furnitureList.append(box)
-            
-            if item.type == "Table":
-                box = F.table(
-                    stationId=item.stationId,
-                    type=item.type,
-                    held=item.held
-                )
-                game.kitchen.furnitureList.append(box)
-            
-            if item.type == "Stove":
-                box = F.stove(
-                    stationId=item.stationId,
-                    type=item.type,
-                    held=item.held
-                )
-                game.kitchen.furnitureList.append(box)
-
+                game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains=I.Ingredient(
+                    isCut=False, isTrash=False, isMixed=False, isFried=False,
+                    isDeepFried=False, isBoiled=False, canCut=False, canMix=False,
+                    canFry=False, canDeepFry=False, canBoil=False, name="Bun"
+                )))
     return SimpleResponse(bSuccess=True, Message="ok")
 
-@app.post("/game/interact", response_model=F.InteractResponse)
-async def interact_with_station(data: F.InteractRequest, request: Request):
+@app.post("/game/interact", response_model=InteractResponse)
+async def interact_with_station(data: InteractRequest, request: Request):
     game: GameState = request.app.state.game
     async with game.lock:
+        ingredient = data.heldIngredient
 
-        station = game.kitchen.get_furniture(data.stationId)
+        if data.stationId.startswith("pantry_tomato"):
+            ingredient = IngredientDto(name="Tomate", type="Vegetal", state="Crudo")
+            return InteractResponse(bSuccess=True, Message="Chef tomó un tomate.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
 
-        if station is not None:
-            response = station.doInteract(data,game.ingredientList)
-            return response
+        if data.stationId.startswith("cutting_board"):
+            ingredient_data = find_ingredient(ingredient.name)
+            if ingredient_data and ingredient_data.canCut:
+                ingredient.state = "Cortado"
+                return InteractResponse(bSuccess=True, Message=f"{ingredient.name} fue cortado.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
+            return InteractResponse(bSuccess=False, Message="Este ingrediente no se puede cortar.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
 
-    return F.InteractResponse(
-        bSuccess=False,
-        Message="La estación no tiene una acción válida.",
-        Score=0,
-        UpdatedHeld=data.held,
-        ActiveRecipes=[]
-    )
+        if data.stationId.startswith("trash"):
+            ingredient = IngredientDto()
+            return InteractResponse(bSuccess=True, Message="Ingrediente desechado.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
 
-@app.get("/game/interact", response_model=kitchen)
-async def getKitchenState(request: Request):
-    game: GameState = request.app.state.game
-    async with game.lock:
-            game.kitchen.update_time(game.ingredientList)
-            return game.kitchen
+        if data.stationId.startswith("burner"):
+            ingredient_data = find_ingredient(ingredient.name)
+            if ingredient_data and ingredient_data.canFry:
+                ingredient.state = "Cooked"
+                return InteractResponse(bSuccess=True, Message=f"{ingredient.name} fue cocinado.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
+            return InteractResponse(bSuccess=False, Message="Este ingrediente no se puede cocinar.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
+
+        if data.stationId.startswith("deepFryer"):
+            ingredient_data = find_ingredient(ingredient.name)
+            if ingredient_data and ingredient_data.canDeepFry:
+                ingredient.state = "DeepFried"
+                return InteractResponse(bSuccess=True, Message=f"{ingredient.name} fue freído.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
+            return InteractResponse(bSuccess=False, Message="Este ingrediente no se puede freír.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
+
+        if data.stationId.startswith("sink"):
+            if ingredient.name == "Plate" and ingredient.state == "Dirty":
+                ingredient.state = "Clean"
+                return InteractResponse(bSuccess=True, Message="El plato fue limpiado.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
+            return InteractResponse(bSuccess=False, Message="La pila solo acepta platos sucios.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
+
+        if data.stationId.startswith("boiler"):
+            ingredient_data = find_ingredient(ingredient.name)
+            if ingredient_data and ingredient_data.canBoil:
+                ingredient.state = "Boiled"
+                return InteractResponse(bSuccess=True, Message=f"{ingredient.name} fue hervido.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
+            return InteractResponse(bSuccess=False, Message="Este ingrediente no se puede hervir.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
+
+        if data.stationId.startswith("servingStation"):
+            if ingredient.type == "Recipe" and ingredient.state == "Ready":
+                matching_order = next(
+                    (o for o in game.kitchen.order_list if o.recipe.name == ingredient.name and o.recipe.canDeliver),
+                    None
+                )
+                if matching_order:
+                    game.kitchen.order_list.remove(matching_order)
+                    game.kitchen.points += matching_order.recipe.currentPoints
+                    return InteractResponse(bSuccess=True, Message=f"Orden de {ingredient.name} entregada!", Score=game.kitchen.points, UpdatedHeldIngredient=IngredientDto(), ActiveRecipes=[])
+            return InteractResponse(bSuccess=False, Message="No hay ninguna orden activa para este platillo.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
+
+        return InteractResponse(bSuccess=False, Message="La estación no tiene una acción válida.", Score=0, UpdatedHeldIngredient=ingredient, ActiveRecipes=[])
