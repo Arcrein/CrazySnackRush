@@ -3,8 +3,9 @@
     {
       "name": "Basic Hamburger",
       "canDeliver": true,
+      "currentPoints": 40,
       "requiredIngredients": [
-        {"name": "Bun", "requiredState": ["Cut"]},
+        {"name": "Bun", "requiredState": []},
         {"name": "Meat", "requiredState": ["Cut", "Fried"]}
         
       ]
@@ -12,18 +13,20 @@
     {
       "name": "Cheeseburger",
       "canDeliver": true,
+      "currentPoints": 60,
       "requiredIngredients": [
-        {"name": "Bun", "requiredState": ["Cut"]},
+        {"name": "Bun", "requiredState": []},
         {"name": "Meat", "requiredState": ["Cut", "Fried"]},
-        {"name": "Cheese", "requiredState": ["Cut", "Fried"]}
+        {"name": "Cheese", "requiredState": ["Cut"]}
         
       ]
     },
     {
       "name": "Lettuce Hamburger",
       "canDeliver": true,
+      "currentPoints": 60,
       "requiredIngredients": [
-        {"name": "Bun", "requiredState": ["Cut"]},
+        {"name": "Bun", "requiredState": []},
         {"name": "Meat", "requiredState": ["Cut", "Fried"]},
         {"name": "Lettuce", "requiredState": ["Cut"]}
         
@@ -32,12 +35,13 @@
     {
       "name": "Supreme Hamburger",
       "canDeliver": true,
+      "currentPoints": 100,
       "requiredIngredients": [
-        {"name": "Bun", "requiredState": ["Cut"]},
+        {"name": "Bun", "requiredState": []},
         {"name": "Meat", "requiredState": ["Cut", "Fried"]},
         {"name": "Lettuce", "requiredState": ["Cut"]},
         {"name": "Tomato", "requiredState": ["Cut"]},
-        {"name": "Cheese", "requiredState": ["Cut", "Fried"]}
+        {"name": "Cheese", "requiredState": ["Cut"]}
       ]
     },
     {
@@ -81,6 +85,7 @@
     {
       "name": "pancake",
       "canDeliver": true,
+      "currentPoints": 60,
       "requiredIngredients": [
         {"name": "pancake batter", "requiredState": ["Fried"]}
         
@@ -89,6 +94,7 @@
     {
       "name": "blueberry pancake",
       "canDeliver": true,
+      "currentPoints": 80,
       "requiredIngredients": [
         {"name": "blueberry pancake batter", "requiredState": ["Fried"]}
         
@@ -98,6 +104,7 @@
     {
       "name": "chocolate pancake",
       "canDeliver": true,
+      "currentPoints": 80,
       "requiredIngredients": [
         {"name": "chocolate batter", "requiredState": ["Fried"]}
       ]
@@ -105,6 +112,7 @@
     {
       "name": "strawberry pancake",
       "canDeliver": true,
+      "currentPoints": 80,
       "requiredIngredients": [
         {"name": "strawberry pancake batter", "requiredState": ["Fried"]}
       ]
@@ -112,6 +120,7 @@
     {
       "name": "chocolate donut",
         "canDeliver": true,
+      "currentPoints": 80,
       "requiredIngredients": [
         {"name": "chocolate batter", "requiredState": ["DeepFried"]}
       ]
@@ -137,6 +146,7 @@
     {
       "name": "honey donut",
       "canDeliver": true,
+      "currentPoints": 80,
       "requiredIngredients": [
         {"name": "honey donut batter", "requiredState": ["DeepFried"]}
       ]
@@ -144,6 +154,7 @@
     {
       "name": "raspberry donut",
       "canDeliver": true,
+      "currentPoints": 80,                                                      
       "requiredIngredients": [
         {"name": "raspberry donut batter", "requiredState": ["DeepFried"]}
       ]
@@ -151,6 +162,7 @@
     {
       "name": "sushi",
       "canDeliver": true,
+      "currentPoints": 60,
       "requiredIngredients": [
         {"name": "Rice", "requiredState": ["Boiled"]},
         {"name": "Fish", "requiredState": ["Cut"]},
@@ -160,6 +172,7 @@
     {
       "name": "cucumber sushi",
       "canDeliver": true,
+      "currentPoints": 60,
       "requiredIngredients": [
         {"name": "Rice", "requiredState": ["Boiled"]},
         {"name": "Cucumber", "requiredState": ["Cut"]},
@@ -169,6 +182,7 @@
     {
       "name": "fish and cucumber sushi",
       "canDeliver": true,
+      "currentPoints": 80,
       "requiredIngredients": [
         {"name": "Rice", "requiredState": ["Boiled"]},
         {"name": "Fish", "requiredState": ["Cut"]},

@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from components.Kitchen import kitchen
 import components.Furniture as F 
 import components.Ingredient as I
+from components.Recipe import Recipe, load_recipes
 import asyncio
 import time
 from components.Ingredient import Ingredient, load_ingredients
@@ -20,6 +21,7 @@ class GameState:
     def __init__(self):
         self.kitchen = kitchen()
         self.ingredientList = load_ingredients()
+        self.recipeList = load_recipes()
         self.lock = asyncio.Lock()
 
     def getIngredient(self, name: str):
@@ -125,7 +127,7 @@ async def interact_with_station(data: F.InteractRequest, request: Request):
         station = game.kitchen.get_furniture(data.stationId)
 
         if station is not None:
-            response = station.doInteract(data,game.ingredientList)
+            response = station.doInteract(data, game.ingredientList, game.recipeList)
             return response
 
     return F.InteractResponse(

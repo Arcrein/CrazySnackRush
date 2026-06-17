@@ -3,14 +3,8 @@
         {
             "name": "Bun",
             "type": "BreadsAndBases",
-            "canCut": true,
-            "cutResult": "CuttedBun",
+            "isReady": true,
             "canBurn": true
-        },
-        {
-            "name": "BurnedBun",
-            "state": "Burned",
-            "type": "BreadsAndBases"
         },
         {
             "name": "Meat",
@@ -33,13 +27,18 @@
             "state": "Fried",
             "type": "Proteins",
             "isReady": true,
+            "canFry": true,
+            "fryResult": "CookedMeat",
             "canBurn": true,
             "burnResult": "BurnedMeat"
         },
         {
             "name": "BurnedMeat",
             "state": "Burned",
-            "type": "Proteins"
+            "type": "Proteins",
+            "canBurn": true,
+            "isBurned": true,
+            "isReady": false
         },
         {
             "name": "Lettuce",
@@ -75,7 +74,6 @@
             "name": "Cheese",
             "type": "others",
             "canCut": true,
-            "canMix": true,
             "cutResult": "CuttedCheese",
             "canBurn": true
         },
@@ -83,22 +81,9 @@
             "name": "CuttedCheese",
             "state": "Cut",
             "type": "others",
-            "canFry": true,
-            "fryResult": "CookedCheese",
-            "canBurn": true
-        },
-        {
-            "name": "CookedCheese",
-            "state": "Fried",
-            "type": "others",
             "isReady": true,
-            "canBurn": true,
-            "burnResult": "BurnedCheese"
-        },
-        {
-            "name": "BurnedCheese",
-            "state": "Burned",
-            "type": "others"
+            "canFry": true,
+            "canBurn": true
         },
         {
             "name": "flour",

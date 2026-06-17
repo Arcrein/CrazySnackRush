@@ -13,7 +13,6 @@ class kitchen(BaseModel):
     type: str = ""
     state: str = ""
     furnitureList: List[F.Furniture] = []
-    #ingredientList: List[Ingredient] = []
     order_list: List[Orden] = []
     time_remaining: float = 0.0
     start_time: float = 0.0

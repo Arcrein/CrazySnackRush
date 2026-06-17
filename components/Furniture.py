@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field
 from components.core import IngredientDto, ObjectDto
 from components.Ingredient import Ingredient
-from components.Recipe import RecipeDto
+from components.Recipe import Recipe, find_matching_recipes
 
 
 CUTTINGTIME: float = 2.0
@@ -69,42 +69,62 @@ def containerCapacity(container: ObjectDto) -> int:
     return 0
 
 
-def canAddToContainer(container: ObjectDto, obj: ObjectDto, ingredientList: List[Ingredient]) -> bool:
+def canAddToContainer(
+    container: ObjectDto,
+    obj: ObjectDto,
+    ingredientList: List[Ingredient],
+    recipeList: Optional[List[Recipe]] = None
+) -> tuple[bool, List[Recipe]]:
     if not isContainer(container):
-        return False
+        return False, []
     if obj.name == "":
-        return False
+        return False, []
     if isContainer(obj):
-        return False
+        return False, []
     if len(container.held) >= containerCapacity(container):
-        return False
+        return False, []
 
     ingredient = getIngredient(ingredientList, obj.name)
     if container.name == "Plate":
-        return ingredient is not None and ingredient.isReady
+        if ingredient is None or not ingredient.isReady:
+            return False, []
+
+        candidate_items = list(container.held)
+        candidate_items.append(IngredientDto(name=obj.name, state=obj.state))
+
+        if recipeList is None:
+            return False, []
+        
+        matchingRecipes = find_matching_recipes(candidate_items, recipeList, deliverable_only=True)
+        return len(matchingRecipes) > 0, matchingRecipes
 
     if container.name == "Mug":
-        return True
+        return True, []
 
     if ingredient is None:
-        return False
+        return False, []
 
     if container.name == "Pot":
-        return ingredient.canBoil
+        return ingredient.canBoil, []
     if container.name == "FryPan":
-        return ingredient.canFry
+        return ingredient.canFry, []
     if container.name in {"FryBasket"}:
-        return ingredient.canDeepFry
+        return ingredient.canDeepFry, []
 
-    return False
+    return False, []
 
 
-def addToContainer(container: ObjectDto, obj: ObjectDto, ingredientList: List[Ingredient]) -> bool:
-    if not canAddToContainer(container, obj, ingredientList):
-        return False
+def addToContainer(
+    container: ObjectDto,
+    obj: ObjectDto,
+    ingredientList: List[Ingredient],
+    recipeList: Optional[List[Recipe]] = None
+) -> tuple[bool, List[Recipe]]:
+    can_add, matching_recipes = canAddToContainer(container, obj, ingredientList, recipeList)
+    if not can_add:
+        return False, matching_recipes
     container.held.append(IngredientDto(name=obj.name, state=obj.state))
-    return True
-
+    return True, matching_recipes
 
 def resetContainerWork(container: ObjectDto):
     container.progress = 0.0
@@ -134,7 +154,7 @@ def finishContainerWorkIfReady(container: ObjectDto, ingredientList: List[Ingred
         return transformObject(ingredient_obj, ingredientList, "Burn")
 
     work_type = getContainerWorkType(container)
-    if work_type != "" and container.progress >= 1:
+    if work_type != "" and container.progress >= 1 and ingredient.isBurned == False:
         transformObject(ingredient_obj, ingredientList, work_type)
 
     return False
@@ -152,9 +172,6 @@ def syncContainerWork(container: ObjectDto, ingredientList: List[Ingredient], pa
             container.lastStartTime = now_ts
 
     burned = finishContainerWorkIfReady(container, ingredientList)
-    if burned:
-        container.isActive = False
-        container.lastStartTime = 0.0
 
     return burned
 
@@ -173,8 +190,6 @@ def startContainerWork(container: ObjectDto, ingredientList: List[Ingredient]) -
     ingredient = getIngredient(ingredientList, ingredient_obj.name)
 
     if ingredient is None:
-        return False
-    if container.progress >= BURNTIME:
         return False
 
     if container.name == "Pot":
@@ -199,14 +214,15 @@ def failResponse(
     held: ObjectDto,
     message: str = "No funca.",
     score: int = 0,
-    is_in_fire: bool = False
+    is_in_fire: bool = False,
+    matching_recipes: Optional[List[Recipe]] = None
 ) -> "InteractResponse":
     return InteractResponse(
         bSuccess=False,
         Message=message,
         Score=score,
         UpdatedHeld=held,
-        ActiveRecipes=[],
+        ActiveRecipes=matching_recipes if matching_recipes is not None else [],
         isInFire=is_in_fire
     )
 
@@ -214,14 +230,15 @@ def failResponse(
 def clearHandResponse(
     message: str = "transfer",
     score: int = 0,
-    is_in_fire: bool = False
+    is_in_fire: bool = False,
+    matching_recipes: Optional[List[Recipe]] = None
 ) -> "InteractResponse":
     return InteractResponse(
         bSuccess=True,
         Message=message,
         Score=score,
         UpdatedHeld=ObjectDto(),
-        ActiveRecipes=[],
+        ActiveRecipes=matching_recipes if matching_recipes is not None else [],
         isInFire=is_in_fire
     )
 
@@ -230,14 +247,15 @@ def transferObjectResponse(
     obj: ObjectDto,
     message: str = "transfer",
     score: int = 0,
-    is_in_fire: bool = False
+    is_in_fire: bool = False,
+    matching_recipes: Optional[List[Recipe]] = None
 ) -> "InteractResponse":
     return InteractResponse(
         bSuccess=True,
         Message=message,
         Score=score,
         UpdatedHeld=obj,
-        ActiveRecipes=[],
+        ActiveRecipes=matching_recipes if matching_recipes is not None else [],
         isInFire=is_in_fire
     )
 
@@ -254,7 +272,7 @@ class InteractResponse(BaseModel):
     Message: str = ""
     Score: int = 0
     UpdatedHeld: ObjectDto = Field(default_factory=ObjectDto)
-    ActiveRecipes: List[RecipeDto] = Field(default_factory=list)
+    ActiveRecipes: List[Recipe] = Field(default_factory=list)
     isInFire: bool = False
 
 
@@ -264,7 +282,12 @@ class Furniture(BaseModel):
     held: ObjectDto = Field(default_factory=ObjectDto)
     isInFire: bool = False
 
-    def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
+    def doInteract(
+        self,
+        request: InteractRequest,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None
+    ) -> InteractResponse:
         return failResponse(request.held)
 
     def sync(self, ingredientList: List[Ingredient]) -> bool:
@@ -276,7 +299,12 @@ class Furniture(BaseModel):
 class IngredientBox(Furniture):
     contains: Ingredient
 
-    def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
+    def doInteract(
+        self,
+        request: InteractRequest,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None
+    ) -> InteractResponse:
         if self.held.name == "" and request.held.name == "":
             ingredient = ObjectDto(name=self.contains.name, state=self.contains.state)
             return transferObjectResponse(ingredient)
@@ -291,8 +319,9 @@ class IngredientBox(Furniture):
             return clearHandResponse()
 
         if self.held.name != "" and request.held.name != "":
-            if addToContainer(self.held, request.held, ingredientList):
-                return clearHandResponse()
+            could_add, matching_recipes = addToContainer(self.held, request.held, ingredientList, recipeList)
+            if could_add:
+                return clearHandResponse(matching_recipes=matching_recipes)
 
             return failResponse(request.held, "Nadie tomo nada.")
 
@@ -300,7 +329,12 @@ class IngredientBox(Furniture):
 
 
 class stove(Furniture):
-    def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
+    def doInteract(
+        self,
+        request: InteractRequest,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None
+    ) -> InteractResponse:
         if request.action != "interact":
             return failResponse(request.held, is_in_fire=self.isInFire)
 
@@ -326,13 +360,14 @@ class stove(Furniture):
             return transferObjectResponse(obj, is_in_fire=self.isInFire)
 
         if self.held.name != "" and request.held.name != "":
-            if addToContainer(self.held, request.held, ingredientList):
+            could_add, matching_recipes = addToContainer(self.held, request.held, ingredientList, recipeList)
+            if could_add:
                 if self.held.name in HEATED_CONTAINERS:
                     resetContainerWork(self.held)
                     startContainerWork(self.held, ingredientList)
-                return clearHandResponse(is_in_fire=self.isInFire)
+                return clearHandResponse(is_in_fire=self.isInFire, matching_recipes=matching_recipes)
 
-            return failResponse(request.held, is_in_fire=self.isInFire)
+            return failResponse(request.held, is_in_fire=self.isInFire, matching_recipes=matching_recipes)
 
         return failResponse(request.held, is_in_fire=self.isInFire)
 
@@ -342,12 +377,18 @@ class cuttingBoard(Furniture):
     cuttingStartTime: datetime = Field(default_factory=datetime.now)
     cuttingDeltaTime: float = 0.0
 
-    def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
+    def doInteract(
+        self,
+        request: InteractRequest,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None
+    ) -> InteractResponse:
         if self.held.name != "" and request.held.name != "":
-            if addToContainer(self.held, request.held, ingredientList):
-                return clearHandResponse()
+            could_add, matching_recipes = addToContainer(self.held, request.held, ingredientList, recipeList)
+            if could_add:
+                return clearHandResponse(matching_recipes=matching_recipes)
 
-            return failResponse(request.held)
+            return failResponse(request.held, matching_recipes=matching_recipes)
 
         if self.held.name == "" and request.held.name != "" and request.action == "interact":
             self.held = request.held
@@ -411,7 +452,12 @@ class servingStation(Furniture):
 
 
 class table(Furniture):
-    def doInteract(self, request: InteractRequest, ingredientList: List[Ingredient]) -> InteractResponse:
+    def doInteract(
+        self,
+        request: InteractRequest,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None
+    ) -> InteractResponse:
         if request.action != "interact":
             return failResponse(request.held)
 
@@ -425,10 +471,11 @@ class table(Furniture):
             return transferObjectResponse(obj)
 
         if self.held.name != "" and request.held.name != "":
-            if addToContainer(self.held, request.held, ingredientList):
-                return clearHandResponse()
+            could_add, matching_recipes = addToContainer(self.held, request.held, ingredientList, recipeList)
+            if could_add:
+                return clearHandResponse(matching_recipes=matching_recipes)
 
-            return failResponse(request.held)
+            return failResponse(request.held, matching_recipes=matching_recipes)
 
         return failResponse(request.held)
 
