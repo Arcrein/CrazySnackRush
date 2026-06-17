@@ -8,7 +8,19 @@ import components.Ingredient as I
 from components.Recipe import Recipe, load_recipes
 import asyncio
 import time
-from components.Ingredient import Ingredient, load_ingredients
+from components.Recipe import load_recipes, load_ingredients
+
+class IngredientDto(BaseModel):
+    name: str = ""
+    type: str = ""
+    state: str = ""
+
+class RecipeDto(BaseModel):
+    RecipeId: str = ""
+    Name: str = ""
+    RequiredIngredients: List[IngredientDto] = []
+    CurrentPoints: int = 0
+    TimeRemaining: float = 0.0
 
 class kitchenStartRequest(BaseModel):
     furnitures: List[F.Furniture] = []
@@ -17,18 +29,25 @@ class SimpleResponse(BaseModel):
     bSuccess: bool
     Message: str
 
+class InteractRequest(BaseModel):
+    chefId: int
+    stationId: str
+    action: str
+    heldIngredient: IngredientDto
+
+class InteractResponse(BaseModel):
+    bSuccess: bool
+    Message: str
+    Score: int
+    UpdatedHeldIngredient: IngredientDto
+    ActiveRecipes: List[RecipeDto]
+
 class GameState:
     def __init__(self):
         self.kitchen = kitchen()
         self.ingredientList = load_ingredients()
         self.recipeList = load_recipes()
         self.lock = asyncio.Lock()
-
-    def getIngredient(self, name: str):
-        for ing in self.ingredientList:
-            if ing.name == name:
-                return ing
-        return None
         
 @asynccontextmanager
 async def lifeSpan(app:FastAPI):
@@ -38,89 +57,26 @@ async def lifeSpan(app:FastAPI):
 
 app = FastAPI(lifespan=lifeSpan)
 
+def find_ingredient(name: str):
+    all_ingredients = load_ingredients()
+    ingredient_data = next((i for i in all_ingredients if i.name == name), None)
+    return ingredient_data
+
 @app.post("/game/start", response_model=SimpleResponse)
 async def gameStart(data: kitchenStartRequest, request: Request):
     game: GameState = request.app.state.game
-    async with game.lock:
-        game.kitchen.start_game()
-
+    async with game.lock: 
         for item in data.furnitures:
-            print("Procesando item:", item.type, item.stationId)
-
             if item.type == "BunIngredientBox":
-                nuevo = game.getIngredient("Bun")
-                box = F.IngredientBox(
-                    stationId=item.stationId,
-                    type=item.type,
-                    contains=nuevo
-                )
-                game.kitchen.furnitureList.append(box)
-                print("ingrediente encontrado:", nuevo)
-
-            if item.type == "MeatIngredientBox":
-                nuevo = game.getIngredient("Meat")
-                box = F.IngredientBox(
-                    stationId=item.stationId,
-                    type=item.type,
-                    contains=nuevo
-                )
-                game.kitchen.furnitureList.append(box)
-            
-            if item.type == "LettuceIngredientBox":
-                nuevo = game.getIngredient("Lettuce")
-                box = F.IngredientBox(
-                    stationId=item.stationId,
-                    type=item.type,
-                    contains=nuevo
-                )
-                game.kitchen.furnitureList.append(box)
-            
-            if item.type == "TomatoIngredientBox":
-                nuevo = game.getIngredient("Tomato")
-                box = F.IngredientBox(
-                    stationId=item.stationId,
-                    type=item.type,
-                    contains=nuevo
-                )
-                game.kitchen.furnitureList.append(box)
-
-            if item.type == "CheeseIngredientBox":
-                nuevo = game.getIngredient("Cheese")
-                box = F.IngredientBox(
-                    stationId=item.stationId,
-                    type=item.type,
-                    contains=nuevo
-                )
-                game.kitchen.furnitureList.append(box)
-            
-            if item.type == "CuttingTable":
-                box = F.cuttingBoard(
-                    stationId=item.stationId,
-                    type=item.type,
-                    held=item.held
-                )
-                game.kitchen.furnitureList.append(box)
-            
-            if item.type == "Table":
-                box = F.table(
-                    stationId=item.stationId,
-                    type=item.type,
-                    held=item.held
-                )
-                game.kitchen.furnitureList.append(box)
-            
-            if item.type == "Stove":
-                box = F.stove(
-                    stationId=item.stationId,
-                    type=item.type,
-                    held=item.held
-                )
-                game.kitchen.furnitureList.append(box)
-
+                game.kitchen.furnitureList.append(F.IngredientBox(stationId=item.stationId, type=item.type, contains=I.Ingredient(
+                    isCut=False, isTrash=False, isMixed=False, isFried=False,
+                    isDeepFried=False, isBoiled=False, canCut=False, canMix=False,
+                    canFry=False, canDeepFry=False, canBoil=False, name="Bun"
+                )))
     return SimpleResponse(bSuccess=True, Message="ok")
 
-@app.post("/game/interact", response_model=F.InteractResponse)
-async def interact_with_station(data: F.InteractRequest, request: Request):
+@app.post("/game/interact", response_model=InteractResponse)
+async def interact_with_station(data: InteractRequest, request: Request):
     game: GameState = request.app.state.game
     async with game.lock:
 
