@@ -140,7 +140,7 @@ class kitchen(BaseModel):
                 )
                 self.furnitureList.append(box)
 
-            if item.type == "TrashCan":
+            if item.type == "TrashCan":     
                 box = F.trashCan(
                     stationId=item.stationId,
                     type=item.type,

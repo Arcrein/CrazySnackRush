@@ -127,6 +127,63 @@ def addToContainer(
     container.held.append(IngredientDto(name=obj.name, state=obj.state))
     return True, matching_recipes
 
+
+def canTransferContainerContentsToPlate(
+    plate: ObjectDto,
+    source_container: ObjectDto,
+    ingredientList: List[Ingredient],
+    recipeList: Optional[List[Recipe]] = None
+) -> tuple[bool, List[Recipe]]:
+    if plate.name != "Plate":
+        return False, []
+    if not isContainer(source_container) or source_container.name == "Plate":
+        return False, []
+    if len(source_container.held) == 0:
+        return False, []
+    if len(plate.held) + len(source_container.held) > containerCapacity(plate):
+        return False, []
+
+    for ingredient_dto in source_container.held:
+        ingredient = getIngredient(ingredientList, ingredient_dto.name)
+        if ingredient is None or not ingredient.isReady:
+            return False, []
+
+    if recipeList is None:
+        return False, []
+
+    candidate_items = list(plate.held)
+    candidate_items.extend(
+        IngredientDto(name=ingredient_dto.name, state=ingredient_dto.state)
+        for ingredient_dto in source_container.held
+    )
+
+    matching_recipes = find_matching_recipes(candidate_items, recipeList, deliverable_only=True)
+    return len(matching_recipes) > 0, matching_recipes
+
+
+def transferContainerContentsToPlate(
+    plate: ObjectDto,
+    source_container: ObjectDto,
+    ingredientList: List[Ingredient],
+    recipeList: Optional[List[Recipe]] = None
+) -> tuple[bool, List[Recipe]]:
+    can_transfer, matching_recipes = canTransferContainerContentsToPlate(
+        plate,
+        source_container,
+        ingredientList,
+        recipeList
+    )
+    if not can_transfer:
+        return False, matching_recipes
+
+    plate.held.extend(
+        IngredientDto(name=ingredient_dto.name, state=ingredient_dto.state)
+        for ingredient_dto in source_container.held
+    )
+    source_container.held.clear()
+    resetContainerWork(source_container)
+    return True, matching_recipes
+
 def resetContainerWork(container: ObjectDto):
     container.progress = 0.0
     container.isActive = False
@@ -360,6 +417,15 @@ class IngredientBox(Furniture):
             return clearHandResponse()
 
         if self.held.name != "" and request.held.name != "":
+            could_transfer, matching_recipes = transferContainerContentsToPlate(
+                self.held,
+                request.held,
+                ingredientList,
+                recipeList
+            )
+            if could_transfer:
+                return transferObjectResponse(request.held, matching_recipes=matching_recipes)
+
             could_add, matching_recipes = addToContainer(self.held, request.held, ingredientList, recipeList)
             if could_add:
                 return clearHandResponse(matching_recipes=matching_recipes)
@@ -402,6 +468,19 @@ class stove(Furniture):
             return transferObjectResponse(obj, is_in_fire=self.isInFire)
 
         if self.held.name != "" and request.held.name != "":
+            could_transfer, matching_recipes = transferContainerContentsToPlate(
+                self.held,
+                request.held,
+                ingredientList,
+                recipeList
+            )
+            if could_transfer:
+                return transferObjectResponse(
+                    request.held,
+                    is_in_fire=self.isInFire,
+                    matching_recipes=matching_recipes
+                )
+
             could_add, matching_recipes = addToContainer(self.held, request.held, ingredientList, recipeList)
             if could_add:
                 if self.held.name in HEATED_CONTAINERS:
@@ -427,6 +506,15 @@ class cuttingBoard(Furniture):
         orderList: Optional[List[Orden]] = None
     ) -> InteractResponse:
         if self.held.name != "" and request.held.name != "":
+            could_transfer, matching_recipes = transferContainerContentsToPlate(
+                self.held,
+                request.held,
+                ingredientList,
+                recipeList
+            )
+            if could_transfer:
+                return transferObjectResponse(request.held, matching_recipes=matching_recipes)
+
             could_add, matching_recipes = addToContainer(self.held, request.held, ingredientList, recipeList)
             if could_add:
                 return clearHandResponse(matching_recipes=matching_recipes)
@@ -549,6 +637,15 @@ class table(Furniture):
             return transferObjectResponse(obj)
 
         if self.held.name != "" and request.held.name != "":
+            could_transfer, matching_recipes = transferContainerContentsToPlate(
+                self.held,
+                request.held,
+                ingredientList,
+                recipeList
+            )
+            if could_transfer:
+                return transferObjectResponse(request.held, matching_recipes=matching_recipes)
+
             could_add, matching_recipes = addToContainer(self.held, request.held, ingredientList, recipeList)
             if could_add:
                 return clearHandResponse(matching_recipes=matching_recipes)
