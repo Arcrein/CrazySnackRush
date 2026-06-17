@@ -10,37 +10,12 @@ import asyncio
 import time
 from components.Recipe import load_recipes, load_ingredients
 
-class IngredientDto(BaseModel):
-    name: str = ""
-    type: str = ""
-    state: str = ""
-
-class RecipeDto(BaseModel):
-    RecipeId: str = ""
-    Name: str = ""
-    RequiredIngredients: List[IngredientDto] = []
-    CurrentPoints: int = 0
-    TimeRemaining: float = 0.0
-
 class kitchenStartRequest(BaseModel):
     furnitures: List[F.Furniture] = []
     
 class SimpleResponse(BaseModel):
     bSuccess: bool
     Message: str
-
-class InteractRequest(BaseModel):
-    chefId: int
-    stationId: str
-    action: str
-    heldIngredient: IngredientDto
-
-class InteractResponse(BaseModel):
-    bSuccess: bool
-    Message: str
-    Score: int
-    UpdatedHeldIngredient: IngredientDto
-    ActiveRecipes: List[RecipeDto]
 
 class GameState:
     def __init__(self):
@@ -75,8 +50,8 @@ async def gameStart(data: kitchenStartRequest, request: Request):
                 )))
     return SimpleResponse(bSuccess=True, Message="ok")
 
-@app.post("/game/interact", response_model=InteractResponse)
-async def interact_with_station(data: InteractRequest, request: Request):
+@app.post("/game/interact", response_model=F.InteractResponse)
+async def interact_with_station(data: F.InteractRequest, request: Request):
     game: GameState = request.app.state.game
     async with game.lock:
 
