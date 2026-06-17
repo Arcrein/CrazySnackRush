@@ -49,7 +49,7 @@ def find_ingredient(name: str):
 async def gameStart(data: kitchenStartRequest, request: Request):
     game: GameState = request.app.state.game
     async with game.lock:
-        game.kitchen.start_game(data.furnitures, game.ingredientList, data.recipeOptions)
+        game.kitchen.start_game(data.furnitures, game.ingredientList, data.recipeOptions, game.recipeList)
         game.recipeOptions = data.recipeOptions
 
     return SimpleResponse(bSuccess=True, Message="ok")
@@ -62,7 +62,12 @@ async def interact_with_station(data: F.InteractRequest, request: Request):
         station = game.kitchen.get_furniture(data.stationId)
 
         if station is not None:
-            response = station.doInteract(data, game.ingredientList, game.recipeList)
+            response = station.doInteract(
+                data,
+                game.ingredientList,
+                game.recipeList,
+                game.kitchen.order_list
+            )
             return response
 
     return F.InteractResponse(
@@ -89,5 +94,5 @@ async def completeOrder(data: Orden, request: Request):
 async def getKitchenState(request: Request):
     game: GameState = request.app.state.game
     async with game.lock:
-            game.kitchen.update_time(game.ingredientList, game.recipeOptions)
+            game.kitchen.update_time(game.ingredientList, game.recipeOptions, game.recipeList)
             return game.kitchen

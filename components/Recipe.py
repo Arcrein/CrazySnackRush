@@ -9,6 +9,7 @@ class RecipeIngredient(BaseModel):
     
 class Recipe(BaseModel):
     recipeId: str = ""
+    orderId: int = 0
     name: str = ""
     requiredIngredients: List[RecipeIngredient] = Field(default_factory=list)
     currentPoints: int = 0

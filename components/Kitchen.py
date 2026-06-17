@@ -47,7 +47,7 @@ class kitchen(BaseModel):
                 return order
         return None
 
-    def start_game(self, furnitures: List[F.Furniture], ingredientList: List[Ingredient], recipeOptions: List[str]):
+    def start_game(self, furnitures: List[F.Furniture], ingredientList: List[Ingredient], recipeOptions: List[str], recipes: List[Recipe]):
         self.time_remaining = 240.0
         self.start_time = datetime.now().timestamp()
         self.points = 0
@@ -56,8 +56,8 @@ class kitchen(BaseModel):
         self.order_id_counter = 0
         self.remainingForOrder = 10.0
 
-        self.generate_random_order(ingredientList, recipeOptions)
-        self.generate_random_order(ingredientList, recipeOptions)
+        self.generate_random_order(recipes, recipeOptions)
+        self.generate_random_order(recipes, recipeOptions)
     
         for item in furnitures:
             print("Procesando item:", item.type, item.stationId)
@@ -132,7 +132,23 @@ class kitchen(BaseModel):
                 )
                 self.furnitureList.append(box)
 
-    def update_time(self, ingredientList: List[Ingredient], recipeOptions: List[str]):
+            if item.type == "ServingStation":
+                box = F.servingStation(
+                    stationId=item.stationId,
+                    type=item.type,
+                    held=item.held
+                )
+                self.furnitureList.append(box)
+
+            if item.type == "TrashCan":
+                box = F.trashCan(
+                    stationId=item.stationId,
+                    type=item.type,
+                    held=item.held
+                )
+                self.furnitureList.append(box)
+
+    def update_time(self, ingredientList: List[Ingredient], recipeOptions: List[str], recipes: List[Recipe]):
         now_ts = datetime.now().timestamp()
         delta_time = now_ts - self.start_time
         self.time_remaining -= delta_time
@@ -152,7 +168,7 @@ class kitchen(BaseModel):
         self.remainingForOrder -= delta_time
         if self.remainingForOrder <= 0:
             self.remainingForOrder = 10.0
-            self.generate_random_order(ingredientList, recipeOptions)
+            self.generate_random_order(recipes, recipeOptions)
         self.start_time = now_ts
    
     def complete_order(self, order: Orden):

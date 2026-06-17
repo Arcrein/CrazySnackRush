@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 from components.core import IngredientDto, ObjectDto
 from components.Ingredient import Ingredient
+from components.Orden import Orden
 from components.Recipe import Recipe, find_matching_recipes
 
 
@@ -210,6 +211,44 @@ def startContainerWork(container: ObjectDto, ingredientList: List[Ingredient]) -
     return True
 
 
+def recipeMatchesPlateExactly(recipe: Recipe, plate_ingredients: List[IngredientDto]) -> bool:
+    if len(plate_ingredients) != len(recipe.requiredIngredients):
+        return False
+
+    return recipe.recipeMatchesIngredients(plate_ingredients)
+
+
+def findPendingOrderForPlate(plate: ObjectDto, orderList: Optional[List[Orden]]) -> Optional[Orden]:
+    if plate.name != "Plate":
+        return None
+    if len(plate.held) == 0:
+        return None
+    if orderList is None:
+        return None
+
+    best_order: Optional[Orden] = None
+
+    for order in orderList:
+        if order.status:
+            continue
+        if order.recipe is None:
+            continue
+        if not recipeMatchesPlateExactly(order.recipe, plate.held):
+            continue
+
+        if best_order is None or order.time_remaining < best_order.time_remaining:
+            best_order = order
+
+    return best_order
+
+
+def buildCompletedOrderRecipe(order: Orden) -> Recipe:
+    recipe = order.recipe.model_copy(deep=True)
+    recipe.orderId = order.id
+    recipe.timeRemaining = order.time_remaining
+    return recipe
+
+
 def failResponse(
     held: ObjectDto,
     message: str = "No funca.",
@@ -286,7 +325,8 @@ class Furniture(BaseModel):
         self,
         request: InteractRequest,
         ingredientList: List[Ingredient],
-        recipeList: Optional[List[Recipe]] = None
+        recipeList: Optional[List[Recipe]] = None,
+        orderList: Optional[List[Orden]] = None
     ) -> InteractResponse:
         return failResponse(request.held)
 
@@ -303,7 +343,8 @@ class IngredientBox(Furniture):
         self,
         request: InteractRequest,
         ingredientList: List[Ingredient],
-        recipeList: Optional[List[Recipe]] = None
+        recipeList: Optional[List[Recipe]] = None,
+        orderList: Optional[List[Orden]] = None
     ) -> InteractResponse:
         if self.held.name == "" and request.held.name == "":
             ingredient = ObjectDto(name=self.contains.name, state=self.contains.state)
@@ -333,7 +374,8 @@ class stove(Furniture):
         self,
         request: InteractRequest,
         ingredientList: List[Ingredient],
-        recipeList: Optional[List[Recipe]] = None
+        recipeList: Optional[List[Recipe]] = None,
+        orderList: Optional[List[Orden]] = None
     ) -> InteractResponse:
         if request.action != "interact":
             return failResponse(request.held, is_in_fire=self.isInFire)
@@ -381,7 +423,8 @@ class cuttingBoard(Furniture):
         self,
         request: InteractRequest,
         ingredientList: List[Ingredient],
-        recipeList: Optional[List[Recipe]] = None
+        recipeList: Optional[List[Recipe]] = None,
+        orderList: Optional[List[Orden]] = None
     ) -> InteractResponse:
         if self.held.name != "" and request.held.name != "":
             could_add, matching_recipes = addToContainer(self.held, request.held, ingredientList, recipeList)
@@ -444,11 +487,45 @@ class deepFryer(Furniture):
 
 
 class trash(Furniture):
-    pass
+    def doInteract(
+        self,
+        request: InteractRequest,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None,
+        orderList: Optional[List[Orden]] = None
+    ) -> InteractResponse:
+        if request.action != "interact":
+            return failResponse(request.held)
+
+        if not isContainer(request.held):
+            return failResponse(request.held)
+
+        return clearHandResponse(message="clear")
 
 
 class servingStation(Furniture):
-    pass
+    def doInteract(
+        self,
+        request: InteractRequest,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None,
+        orderList: Optional[List[Orden]] = None
+    ) -> InteractResponse:
+        if request.action != "interact":
+            return failResponse(request.held)
+
+        if request.held.name != "Plate":
+            return failResponse(request.held)
+
+        if len(request.held.held) == 0:
+            return failResponse(request.held)
+
+        matched_order = findPendingOrderForPlate(request.held, orderList)
+        if matched_order is None or matched_order.recipe is None:
+            return failResponse(request.held, "No hay una orden pendiente para ese plato.")
+
+        completed_recipe = buildCompletedOrderRecipe(matched_order)
+        return clearHandResponse(matching_recipes=[completed_recipe])
 
 
 class table(Furniture):
@@ -456,7 +533,8 @@ class table(Furniture):
         self,
         request: InteractRequest,
         ingredientList: List[Ingredient],
-        recipeList: Optional[List[Recipe]] = None
+        recipeList: Optional[List[Recipe]] = None,
+        orderList: Optional[List[Orden]] = None
     ) -> InteractResponse:
         if request.action != "interact":
             return failResponse(request.held)
