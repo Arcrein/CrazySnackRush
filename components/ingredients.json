@@ -82,7 +82,6 @@
             "state": "Cut",
             "type": "others",
             "isReady": true,
-            "canFry": true,
             "canBurn": true
         },
         {

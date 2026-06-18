@@ -377,6 +377,8 @@ class Furniture(BaseModel):
     type: str = "Table"
     held: ObjectDto = Field(default_factory=ObjectDto)
     isInFire: bool = False
+    progress: float = 0.0
+    jobsCompleted: int = 0
 
     def doInteract(
         self,
@@ -574,7 +576,7 @@ class deepFryer(Furniture):
     pass
 
 
-class trash(Furniture):
+class trashCan(Furniture):
     def doInteract(
         self,
         request: InteractRequest,
@@ -583,9 +585,6 @@ class trash(Furniture):
         orderList: Optional[List[Orden]] = None
     ) -> InteractResponse:
         if request.action != "interact":
-            return failResponse(request.held)
-
-        if not isContainer(request.held):
             return failResponse(request.held)
 
         return clearHandResponse(message="clear")
@@ -656,8 +655,139 @@ class table(Furniture):
 
 
 class sink(Furniture):
-    pass
+    isWashing: bool = False
+    washingStartTime: datetime = Field(default_factory=datetime.now)
+    washingDeltaTime: float = 0.0
+  
 
 
-class dish_spawner(Furniture):
-    pass
+    def sync(self, ingredientList: List[Ingredient]) -> None:
+        if self.isWashing:
+            self.washingDeltaTime += (datetime.now() - self.washingStartTime).total_seconds()
+            self.washingStartTime = datetime.now()
+            
+            
+            if self.washingDeltaTime >= CUTTINGTIME and self.held.name == "PlateStack" and self.held.progress > 0:
+                self.jobsCompleted += 1
+                self.washingDeltaTime = 0.0
+               
+                if self.held.name == "PlateStack" and self.held.state == "dirty":
+                    self.held.progress -= 1
+                    if self.held.progress <= 0:
+                        self.held = ObjectDto()
+                        self.isWashing = False
+            
+            self.progress = max(0, min(1, self.washingDeltaTime / CUTTINGTIME))
+
+    # Similar al cutting board pero para lavar platos sucios. Solo acepta recibir un plateStack en estado dirty y solo regresa un plate con estado clean cuando interactua pero lleva el contador de cuantos platos limpios y sucios tiene, para que se pueda usar para lavar varias veces un stack de platos sucios y que vaya entregando platos limpios de a uno.
+    def doInteract(
+        self,
+        request: InteractRequest,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None,
+        orderList: Optional[List[Orden]] = None
+    ) -> InteractResponse:
+        
+        if self.held.name == "" and request.held.name != "" and request.action == "interact":
+            if request.held.name == "PlateStack" and request.held.state == "dirty":
+                self.held = request.held
+                self.isWashing = False
+                self.washingDeltaTime = 0.0
+                return clearHandResponse()
+
+            return failResponse(request.held)
+        
+        if self.held.name != "" and request.held.name != "" and request.action == "interact":
+            if self.held.name == "PlateStack" and self.held.state == "dirty":
+                self.held.progress = max(0, self.held.progress + request.held.progress)
+                return clearHandResponse()
+
+        if self.held.name != "" and request.held.name == "" and request.action == "activate":
+            if self.held.name == "PlateStack" and self.held.state == "dirty":
+                self.isWashing = True
+                self.washingStartTime = datetime.now()
+                return clearHandResponse("Casi")
+
+            return failResponse(request.held)
+
+        if request.action == "deactivate":
+            if self.isWashing:
+                self.isWashing = False
+                self.washingDeltaTime += (datetime.now() - self.washingStartTime).total_seconds()
+                percentage = self.progress
+
+                return clearHandResponse("Progress: 100", score=percentage*100)
+
+            return failResponse(request.held)
+
+        if self.jobsCompleted > 0 and request.action == "interact" and request.held.name == "":
+            obj = ObjectDto(name="Plate", state="", progress=1, isActive=False, workType="", lastStartTime=0.0)
+            self.jobsCompleted -= 1
+            return transferObjectResponse(obj)
+
+        return failResponse()
+        
+
+
+class dishSpawner(Furniture):
+    deliveredPlates: int = 0
+    dirtyPlates: int = 0
+    lastUpdateTime: float =  0.0
+    remainingTime: float = 10.0
+
+    def deliverPlate(self):
+        if self.deliveredPlates == 0:
+            self.remainingTime = 10.0
+        self.deliveredPlates += 1
+
+    def sync(self, ingredientList: List[Ingredient]) -> None:
+        now_ts = datetime.now().timestamp()
+        delta = now_ts - self.lastUpdateTime
+        self.lastUpdateTime = now_ts
+
+        if self.deliveredPlates == 0:
+            return
+
+        if self.remainingTime > 0:
+            self.remainingTime -= delta
+
+        if self.remainingTime <= 0 and self.deliveredPlates > 0:
+            self.dirtyPlates += 1
+            self.deliveredPlates -= 1
+            self.remainingTime = 10.0
+
+        if self.dirtyPlates > 0:
+            if self.held.name == "":
+                self.held = ObjectDto(name="PlateStack", state="dirty", progress=self.dirtyPlates, isActive=False, workType="", lastStartTime=0.0)
+            else:
+                self.held.progress = self.dirtyPlates
+        elif self.held.name != "":
+            self.held = ObjectDto()
+            
+
+    def doInteract(
+        self,
+        request: InteractRequest,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None,
+        orderList: Optional[List[Orden]] = None
+    ) -> InteractResponse:
+        if request.action != "interact":
+            return failResponse(request.held)
+
+        if self.held.name == "" and request.held.name == "":
+            return failResponse()
+
+        if self.held.name != "" and request.held.name == "":
+            obj = self.held
+            self.dirtyPlates = 0
+            self.held = ObjectDto()
+            return transferObjectResponse(obj)
+
+        if self.held.name == "" and request.held.name != "":
+            return failResponse()
+
+        if self.held.name != "" and request.held.name != "":
+            return failResponse()
+
+        return failResponse(request.held)

@@ -35,6 +35,12 @@ class kitchen(BaseModel):
                 return furniture
         return None
     
+    def getFurnitureByType(self, type: str):
+        for furniture in self.furnitureList:
+            if furniture.type == type:
+                return furniture
+        return None
+
     def getIngredient(self, name: str, ingredientList: List[Ingredient]):
         for ing in ingredientList:
             if ing.name == name:
@@ -147,6 +153,22 @@ class kitchen(BaseModel):
                     held=item.held
                 )
                 self.furnitureList.append(box)
+            
+            if item.type == "DishSpawner":
+                box = F.dishSpawner(
+                    stationId=item.stationId,
+                    type=item.type,
+                    held=item.held
+                )
+                self.furnitureList.append(box)
+            
+            if item.type == "Sink":
+                box = F.sink(
+                    stationId=item.stationId,
+                    type=item.type,
+                    held=item.held
+                )
+                self.furnitureList.append(box)
 
     def update_time(self, ingredientList: List[Ingredient], recipeOptions: List[str], recipes: List[Recipe]):
         now_ts = datetime.now().timestamp()
@@ -174,6 +196,9 @@ class kitchen(BaseModel):
     def complete_order(self, order: Orden):
         order_in_list = self.getOrder(order.id)
         if order_in_list and order_in_list.status == False:
+            dishSpawner: F.dishSpawner = self.getFurnitureByType("DishSpawner")
+            if dishSpawner:
+                dishSpawner.deliverPlate()
             self.points += order_in_list.recipe.currentPoints
             if order_in_list.time_remaining > 80.0:
                 self.points += 8 #puntos extra por completar la orden a tiempo
