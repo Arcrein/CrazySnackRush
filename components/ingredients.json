@@ -94,53 +94,18 @@
             "name": "Egg",
             "type": "Proteins",
             "canMix": true,
-            "canFry": true,
-            "fryResult": "FriedEgg",
-            "canBoil": true,
-            "boilResult": "BoiledEgg",
             "canBurn": true
-        },
-        {
-            "name": "FriedEgg",
-            "state": "Fried",
-            "type": "Proteins",
-            "isReady": true,
-            "canBurn": true,
-            "burnResult": "BurnedEgg"
-        },
-        {
-            "name": "BoiledEgg",
-            "state": "Boiled",
-            "type": "Proteins",
-            "isReady": true,
-            "canBurn": true,
-            "burnResult": "BurnedEgg"
-        },
-        {
-            "name": "BurnedEgg",
-            "state": "Burned",
-            "type": "Proteins"
         },
         {
             "name": "Blueberry",
             "type": "VegetablesAndFruits",
-            "canCut": true,
             "canMix": true,
-            "cutResult": "CuttedBlueberry",
             "canBurn": true
-        },
-        {
-            "name": "CuttedBlueberry",
-            "state": "Cut",
-            "type": "VegetablesAndFruits",
-            "isReady": true,
-            "canMix": true
         },
         {
             "name": "Chocolate",
             "type": "others",
             "canCut": true,
-            "canMix": true,
             "cutResult": "CuttedChocolate",
             "canBurn": true
         },
@@ -154,9 +119,7 @@
         {
             "name": "Strawberry",
             "type": "VegetablesAndFruits",
-            "canCut": true,
             "canMix": true,
-            "cutResult": "CuttedStrawberry",
             "canBurn": true
         },
         {
@@ -182,15 +145,15 @@
             "canMix": true
         },
         {
-            "name": "Raspberry",
+            "name": "Blueberry",
             "type": "VegetablesAndFruits",
             "canCut": true,
             "canMix": true,
-            "cutResult": "CuttedRaspberry",
+            "cutResult": "CuttedBlueberry",
             "canBurn": true
         },
         {
-            "name": "CuttedRaspberry",
+            "name": "CuttedBlueberry",
             "state": "Cut",
             "type": "VegetablesAndFruits",
             "isReady": true,
@@ -249,6 +212,11 @@
             "state": "Cut",
             "type": "VegetablesAndFruits",
             "isReady": true
+        },
+        {
+            "name": "Trash",
+            "type": "others",
+            "isTrash": true
         }
     ]
 }

@@ -59,7 +59,7 @@
       "requiredIngredients": [
         {"name": "flour", "requiredState": ["Mix"]},
         {"name": "Egg", "requiredState": ["Mix"]},
-        {"name": "Blueberry", "requiredState": ["Cut"]}
+        {"name": "Blueberry", "requiredState": []}
         
       ]
     },
@@ -79,7 +79,7 @@
       "requiredIngredients": [
         {"name": "flour", "requiredState": ["Mix"]},
         {"name": "Egg", "requiredState": ["Mix"]},
-        {"name": "Strawberry", "requiredState": ["Cut"]}
+        {"name": "Strawberry", "requiredState": []}
       ]
     },
     {
@@ -135,12 +135,12 @@
       ]
     },
     {
-      "name": "raspberry donut batter",
+      "name": "blueberry donut batter",
       "canDeliver": false,
       "requiredIngredients": [
         {"name": "flour", "requiredState": ["Mix"]},
         {"name": "Egg", "requiredState": ["Mix"]},
-        {"name": "Raspberry", "requiredState": ["Cut"]}
+        {"name": "Blueberry", "requiredState": []}
       ]
     },
     {
@@ -152,11 +152,11 @@
       ]
     },
     {
-      "name": "raspberry donut",
+      "name": "blueberry donut",
       "canDeliver": true,
       "currentPoints": 80,                                                      
       "requiredIngredients": [
-        {"name": "raspberry donut batter", "requiredState": ["DeepFried"]}
+        {"name": "blueberry donut batter", "requiredState": ["DeepFried"]}
       ]
     },
     {

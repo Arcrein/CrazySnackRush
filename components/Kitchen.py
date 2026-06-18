@@ -123,6 +123,24 @@ class kitchen(BaseModel):
                 )
                 self.furnitureList.append(box)
             
+            if item.type == "StrawberryIngredientBox":
+                nuevo = self.getIngredient("Strawberry", ingredientList)
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                self.furnitureList.append(box)
+
+            if item.type == "BlueberryIngredientBox":
+                nuevo = self.getIngredient("Blueberry", ingredientList)
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                self.furnitureList.append(box)
+
             if item.type == "EggIngredientBox":
                 nuevo = self.getIngredient("Egg", ingredientList)
                 box = F.IngredientBox(
@@ -134,6 +152,15 @@ class kitchen(BaseModel):
             
             if item.type == "FlourIngredientBox":
                 nuevo = self.getIngredient("Flour", ingredientList)
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                self.furnitureList.append(box)
+
+            if item.type == "HoneycombIngredientBox":
+                nuevo = self.getIngredient("Honeycomb", ingredientList)
                 box = F.IngredientBox(
                     stationId=item.stationId,
                     type=item.type,
@@ -201,6 +228,22 @@ class kitchen(BaseModel):
                 )
                 self.furnitureList.append(box)
 
+            if item.type == "Mixer":
+                box = F.mixer(
+                    stationId=item.stationId,
+                    type=item.type,
+                    held=item.held
+                )
+                self.furnitureList.append(box)
+
+            if item.type in {"DeepFryer", "Deepfryer"}:
+                box = F.deepFryer(
+                    stationId=item.stationId,
+                    type=item.type,
+                    held=item.held
+                )
+                self.furnitureList.append(box)
+
             if item.type == "ServingStation":
                 box = F.servingStation(
                     stationId=item.stationId,
@@ -238,7 +281,7 @@ class kitchen(BaseModel):
         delta_time = now_ts - self.start_time
         self.time_remaining -= delta_time
         for furniture in self.furnitureList:
-            furniture.sync(ingredientList)
+            furniture.sync(ingredientList, recipes)
         for order in self.order_list:
             if order.status == False:
                 order.time_remaining -= now_ts - order.start_time

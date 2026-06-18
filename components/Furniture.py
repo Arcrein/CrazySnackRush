@@ -10,6 +10,7 @@ from components.Recipe import Recipe, find_matching_recipes
 CUTTINGTIME: float = 2.0
 COOKINGTIME: float = 12.0
 BURNTIME: float = COOKINGTIME * 2.0
+MIXTIME: float = 2.0
 
 SINGLE_SLOT_CONTAINERS = {"Pot", "FryPan", "FryBasket"}
 MULTI_SLOT_CONTAINERS = {"Plate", "Mug"}
@@ -65,7 +66,9 @@ def isContainer(obj: ObjectDto) -> bool:
 def containerCapacity(container: ObjectDto) -> int:
     if container.name in SINGLE_SLOT_CONTAINERS:
         return 1
-    if container.name in MULTI_SLOT_CONTAINERS:
+    if container.name == "Mug":
+        return 3
+    if container.name == "Plate":
         return 10
     return 0
 
@@ -99,11 +102,11 @@ def canAddToContainer(
         matchingRecipes = find_matching_recipes(candidate_items, recipeList, deliverable_only=True)
         return len(matchingRecipes) > 0, matchingRecipes
 
-    if container.name == "Mug":
-        return True, []
-
     if ingredient is None:
         return False, []
+
+    if container.name == "Mug":
+        return ingredient.canMix, []
 
     if container.name == "Pot":
         return ingredient.canBoil, []
@@ -125,6 +128,7 @@ def addToContainer(
     if not can_add:
         return False, matching_recipes
     container.held.append(IngredientDto(name=obj.name, state=obj.state))
+    resetContainerWork(container)
     return True, matching_recipes
 
 
@@ -192,6 +196,8 @@ def resetContainerWork(container: ObjectDto):
 
 
 def getContainerWorkType(container: ObjectDto) -> str:
+    if container.name == "Mug":
+        return "Mix"
     if container.name == "Pot":
         return "Boil"
     if container.name == "FryPan":
@@ -268,11 +274,147 @@ def startContainerWork(container: ObjectDto, ingredientList: List[Ingredient]) -
     return True
 
 
-def recipeMatchesPlateExactly(recipe: Recipe, plate_ingredients: List[IngredientDto]) -> bool:
-    if len(plate_ingredients) != len(recipe.requiredIngredients):
+def ingredientMatchesRequirementForMixing(
+    ingredient_dto: IngredientDto,
+    requirement,
+    ingredientList: List[Ingredient]
+) -> bool:
+    ingredient_name = ingredient_dto.name.lower()
+    requirement_name = requirement.name.lower()
+
+    if requirement_name not in ingredient_name:
         return False
 
-    return recipe.recipeMatchesIngredients(plate_ingredients)
+    if len(requirement.requiredState) == 0:
+        return True
+
+    if ingredient_dto.state in requirement.requiredState:
+        return True
+
+    ingredient = getIngredient(ingredientList, ingredient_dto.name)
+    if ingredient is None:
+        return False
+
+    return "Mix" in requirement.requiredState and ingredient.canMix
+
+
+def recipeCanBeMixedFromIngredients(
+    recipe: Recipe,
+    ingredients: List[IngredientDto],
+    ingredientList: List[Ingredient]
+) -> bool:
+    if len(ingredients) != len(recipe.requiredIngredients):
+        return False
+
+    used_requirements = [False] * len(recipe.requiredIngredients)
+
+    def backtrack(index: int) -> bool:
+        if index >= len(ingredients):
+            return True
+
+        ingredient_dto = ingredients[index]
+
+        for req_index, requirement in enumerate(recipe.requiredIngredients):
+            if used_requirements[req_index]:
+                continue
+            if not ingredientMatchesRequirementForMixing(ingredient_dto, requirement, ingredientList):
+                continue
+
+            used_requirements[req_index] = True
+            if backtrack(index + 1):
+                return True
+            used_requirements[req_index] = False
+
+        return False
+
+    return backtrack(0)
+
+
+def findMixerRecipe(
+    mug: ObjectDto,
+    ingredientList: List[Ingredient],
+    recipeList: Optional[List[Recipe]]
+) -> Optional[Recipe]:
+    if mug.name != "Mug" or recipeList is None:
+        return None
+    if len(mug.held) == 0:
+        return None
+
+    for recipe in recipeList:
+        if recipe.canDeliver:
+            continue
+        if recipeCanBeMixedFromIngredients(recipe, mug.held, ingredientList):
+            return recipe
+
+    return None
+
+
+def startMixerWork(
+    mug: ObjectDto,
+    ingredientList: List[Ingredient],
+    recipeList: Optional[List[Recipe]]
+) -> bool:
+    if mug.name != "Mug":
+        return False
+    if len(mug.held) == 0:
+        return False
+
+    mug.isActive = True
+    mug.workType = "Mix"
+    mug.lastStartTime = datetime.now().timestamp()
+    return True
+
+
+def finishMixerWorkIfReady(
+    mug: ObjectDto,
+    ingredientList: List[Ingredient],
+    recipeList: Optional[List[Recipe]]
+) -> bool:
+    if mug.name != "Mug":
+        return False
+    if mug.progress < 1.0:
+        return False
+
+    mix_recipe = findMixerRecipe(mug, ingredientList, recipeList)
+    if mix_recipe is None:
+        mug.held = [IngredientDto(name="Trash", state="")]
+    else:
+        mug.held = [IngredientDto(name=mix_recipe.name, state="Mix")]
+
+    mug.isActive = False
+    mug.workType = "Mix"
+    mug.progress = 0.0
+    mug.lastStartTime = 0.0
+    return True
+
+
+def syncMixerWork(
+    mug: ObjectDto,
+    ingredientList: List[Ingredient],
+    recipeList: Optional[List[Recipe]],
+    pause_work: bool
+) -> bool:
+    if mug.name != "Mug":
+        return False
+
+    if mug.isActive:
+        now_ts = datetime.now().timestamp()
+        mug.progress += (now_ts - mug.lastStartTime) / MIXTIME
+
+        if pause_work:
+            mug.isActive = False
+            mug.lastStartTime = 0.0
+        else:
+            mug.lastStartTime = now_ts
+
+    return finishMixerWorkIfReady(mug, ingredientList, recipeList)
+
+
+def recipeMatchesIngredientsExactly(recipe: Recipe, ingredients: List[IngredientDto]) -> bool:
+    if len(ingredients) != len(recipe.requiredIngredients):
+        return False
+
+    return recipe.recipeMatchesIngredients(ingredients)
 
 
 def findPendingOrderForPlate(plate: ObjectDto, orderList: Optional[List[Orden]]) -> Optional[Orden]:
@@ -290,7 +432,7 @@ def findPendingOrderForPlate(plate: ObjectDto, orderList: Optional[List[Orden]])
             continue
         if order.recipe is None:
             continue
-        if not recipeMatchesPlateExactly(order.recipe, plate.held):
+        if not recipeMatchesIngredientsExactly(order.recipe, plate.held):
             continue
 
         if best_order is None or order.time_remaining < best_order.time_remaining:
@@ -389,7 +531,11 @@ class Furniture(BaseModel):
     ) -> InteractResponse:
         return failResponse(request.held)
 
-    def sync(self, ingredientList: List[Ingredient]) -> bool:
+    def sync(
+        self,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None
+    ) -> bool:
         if self.held.name in HEATED_CONTAINERS:
             if syncContainerWork(self.held, ingredientList, pause_work=False):
                 self.isInFire = True
@@ -494,6 +640,18 @@ class stove(Furniture):
 
         return failResponse(request.held, is_in_fire=self.isInFire)
 
+    def sync(
+        self,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None
+    ) -> None:
+        if self.held.name in HEATED_CONTAINERS:
+            if syncContainerWork(self.held, ingredientList, pause_work=False):
+                self.isInFire = True
+            self.progress = self.held.progress
+        else:
+            self.progress = 0.0
+
 
 class cuttingBoard(Furniture):
     isCutting: bool = False
@@ -569,11 +727,110 @@ class cuttingBoard(Furniture):
 
 
 class mixer(Furniture):
-    pass
+    def doInteract(
+        self,
+        request: InteractRequest,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None,
+        orderList: Optional[List[Orden]] = None
+    ) -> InteractResponse:
+        if request.action != "interact":
+            return failResponse(request.held)
+
+        if self.held.name == "Mug":
+            syncMixerWork(self.held, ingredientList, recipeList, pause_work=False)
+
+        if self.held.name == "" and request.held.name != "":
+            if request.held.name != "Mug":
+                return failResponse(request.held)
+
+            self.held = request.held
+            startMixerWork(self.held, ingredientList, recipeList)
+            return clearHandResponse()
+
+        if self.held.name != "" and request.held.name == "":
+            if self.held.name == "Mug":
+                syncMixerWork(self.held, ingredientList, recipeList, pause_work=True)
+
+            obj = self.held
+            self.held = ObjectDto()
+            return transferObjectResponse(obj)
+
+        if self.held.name == "Mug" and request.held.name != "":
+            could_add, matching_recipes = addToContainer(self.held, request.held, ingredientList, recipeList)
+            if could_add:
+                startMixerWork(self.held, ingredientList, recipeList)
+                return clearHandResponse(matching_recipes=matching_recipes)
+
+            return failResponse(request.held, matching_recipes=matching_recipes)
+
+        return failResponse(request.held)
+
+    def sync(
+        self,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None
+    ) -> None:
+        if self.held.name == "Mug":
+            syncMixerWork(self.held, ingredientList, recipeList, pause_work=False)
+            self.progress = self.held.progress
+        else:
+            self.progress = 0.0
 
 
 class deepFryer(Furniture):
-    pass
+    def doInteract(
+        self,
+        request: InteractRequest,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None,
+        orderList: Optional[List[Orden]] = None
+    ) -> InteractResponse:
+        if request.action != "interact":
+            return failResponse(request.held, is_in_fire=self.isInFire)
+
+        if self.held.name in {"FryBasket"}:
+            if syncContainerWork(self.held, ingredientList, pause_work=False):
+                self.isInFire = True
+
+        if self.held.name == "" and request.held.name != "":
+            if request.held.name != "FryBasket":
+                return failResponse(request.held, is_in_fire=self.isInFire)
+
+            self.held = request.held
+            startContainerWork(self.held, ingredientList)
+            return clearHandResponse(is_in_fire=self.isInFire)
+
+        if self.held.name != "" and request.held.name == "":
+            if self.held.name == "FryBasket":
+                if pauseContainerWork(self.held, ingredientList):
+                    self.isInFire = True
+
+            obj = self.held
+            self.held = ObjectDto()
+            return transferObjectResponse(obj, is_in_fire=self.isInFire)
+
+        if self.held.name == "FryBasket" and request.held.name != "":
+            could_add, matching_recipes = addToContainer(self.held, request.held, ingredientList, recipeList)
+            if could_add:
+                startContainerWork(self.held, ingredientList)
+                return clearHandResponse(is_in_fire=self.isInFire, matching_recipes=matching_recipes)
+
+            return failResponse(request.held, is_in_fire=self.isInFire, matching_recipes=matching_recipes)
+
+        return failResponse(request.held, is_in_fire=self.isInFire)
+
+    def sync(
+        self,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None
+    ) -> None:
+        if self.held.name == "FryBasket":
+            if syncContainerWork(self.held, ingredientList, pause_work=False):
+                self.isInFire = True
+            self.progress = self.held.progress
+        else:
+            self.progress = 0.0
 
 
 class trashCan(Furniture):
@@ -661,7 +918,11 @@ class sink(Furniture):
   
 
 
-    def sync(self, ingredientList: List[Ingredient]) -> None:
+    def sync(
+        self,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None
+    ) -> None:
         if self.isWashing:
             self.washingDeltaTime += (datetime.now() - self.washingStartTime).total_seconds()
             self.washingStartTime = datetime.now()
@@ -740,7 +1001,11 @@ class dishSpawner(Furniture):
             self.remainingTime = 10.0
         self.deliveredPlates += 1
 
-    def sync(self, ingredientList: List[Ingredient]) -> None:
+    def sync(
+        self,
+        ingredientList: List[Ingredient],
+        recipeList: Optional[List[Recipe]] = None
+    ) -> None:
         now_ts = datetime.now().timestamp()
         delta = now_ts - self.lastUpdateTime
         self.lastUpdateTime = now_ts
