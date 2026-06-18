@@ -113,6 +113,69 @@ class kitchen(BaseModel):
                     contains=nuevo
                 )
                 self.furnitureList.append(box)
+
+            if item.type == "ChocolateIngredientBox":
+                nuevo = self.getIngredient("Chocolate", ingredientList)
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                self.furnitureList.append(box)
+            
+            if item.type == "EggIngredientBox":
+                nuevo = self.getIngredient("Egg", ingredientList)
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                self.furnitureList.append(box)
+            
+            if item.type == "FlourIngredientBox":
+                nuevo = self.getIngredient("Flour", ingredientList)
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                self.furnitureList.append(box)
+
+            if item.type == "NoriIngredientBox":
+                nuevo = self.getIngredient("Nori", ingredientList)
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                self.furnitureList.append(box)
+
+            if item.type == "RiceIngredientBox":
+                nuevo = self.getIngredient("Rice", ingredientList)
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                self.furnitureList.append(box)
+            
+            if item.type == "CuecumberIngredientBox":
+                nuevo = self.getIngredient("Cucumber", ingredientList)
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                self.furnitureList.append(box)
+
+            if item.type == "FishIngredientBox":
+                nuevo = self.getIngredient("Fish", ingredientList)
+                box = F.IngredientBox(
+                    stationId=item.stationId,
+                    type=item.type,
+                    contains=nuevo
+                )
+                self.furnitureList.append(box)
             
             if item.type == "CuttingTable":
                 box = F.cuttingBoard(

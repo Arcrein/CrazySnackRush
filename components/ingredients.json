@@ -85,7 +85,7 @@
             "canBurn": true
         },
         {
-            "name": "flour",
+            "name": "Flour",
             "type": "others",
             "canMix": true,
             "canBurn": true
@@ -199,17 +199,8 @@
         {
             "name": "Nori",
             "type": "others",
-            "canCut": true,
-            "canMix": true,
-            "cutResult": "CuttedNori",
-            "canBurn": true
-        },
-        {
-            "name": "CuttedNori",
-            "state": "Cut",
-            "type": "others",
-            "isReady": true,
-            "canMix": true
+            "canBurn": true,
+            "isReady": true
         },
         {
             "name": "Rice",
@@ -236,10 +227,7 @@
             "name": "Fish",
             "type": "Proteins",
             "canCut": true,
-            "canMix": true,
             "cutResult": "CuttedFish",
-            "canBoil": true,
-            "boilResult": "BoiledFish",
             "canBurn": true
         },
         {
@@ -247,28 +235,12 @@
             "state": "Cut",
             "type": "Proteins",
             "isReady": true,
-            "canBoil": true,
-            "boilResult": "BoiledFish",
             "canBurn": true
-        },
-        {
-            "name": "BoiledFish",
-            "state": "Boiled",
-            "type": "Proteins",
-            "isReady": true,
-            "canBurn": true,
-            "burnResult": "BurnedFish"
-        },
-        {
-            "name": "BurnedFish",
-            "state": "Burned",
-            "type": "Proteins"
         },
         {
             "name": "Cucumber",
             "type": "VegetablesAndFruits",
             "canCut": true,
-            "canMix": true,
             "cutResult": "CuttedCucumber",
             "canBurn": true
         },
@@ -276,8 +248,7 @@
             "name": "CuttedCucumber",
             "state": "Cut",
             "type": "VegetablesAndFruits",
-            "isReady": true,
-            "canMix": true
+            "isReady": true
         }
     ]
 }
